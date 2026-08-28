@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { Menu, X, ArrowRight, Truck, Leaf, ShieldCheck, MapPin, Phone, MessageCircle, Globe, Mail } from 'lucide-react';
+import { Menu, X, ArrowRight, Truck, Leaf, ShieldCheck, MapPin, Phone, MessageCircle, Globe, Mail, BookOpen, Package, Palette } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function App() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleMenu = () => setIsOpen(!isOpen);
 
+  const solicitarServicio = (nombreServicio) => {
+    const numeroWhatsApp = "50240794985";
+    const mensaje = `🌿 *Hola Vivero Pensamiento*, me gustaría recibir más información y cotizar su servicio de *${nombreServicio}*.`;
+    const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-vivero-cream text-vivero-dark font-sans antialiased selection:bg-vivero-green selection:text-white">
       
-      {/* BARRA SUPERIOR (TOP BAR) */}
+      {/* BARRA SUPERIOR */}
       <div className="bg-vivero-dark text-vivero-cream py-2 px-4 text-xs sm:text-sm font-medium">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center">
           <div className="flex items-center space-x-4 mb-2 sm:mb-0">
@@ -25,12 +33,10 @@ export default function App() {
       <header className="sticky top-0 z-50 bg-vivero-cream/95 backdrop-blur-md border-b border-vivero-green/20 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20 sm:h-24">
-            {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
               <img src="/logo.png" alt="Logo Vivero Pensamiento" className="h-16 sm:h-20 w-auto drop-shadow-sm transition-transform hover:scale-105" />
             </div>
             
-            {/* Menú Escritorio */}
             <nav className="hidden md:flex items-center space-x-8 font-medium">
               <a href="#inicio" className="text-vivero-dark hover:text-vivero-purple transition-colors">Inicio</a>
               <a href="#categorias" className="text-vivero-dark hover:text-vivero-purple transition-colors">Categorías</a>
@@ -38,7 +44,6 @@ export default function App() {
               <a href="#contacto" className="text-vivero-dark hover:text-vivero-purple transition-colors">Contacto</a>
             </nav>
 
-            {/* Botón WhatsApp Escritorio */}
             <div className="hidden md:flex">
               <a href="#" className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-full text-white bg-vivero-purple hover:bg-opacity-90 shadow-md transition-all transform hover:-translate-y-0.5">
                 <MessageCircle className="w-5 h-5 mr-2" />
@@ -46,7 +51,6 @@ export default function App() {
               </a>
             </div>
 
-            {/* Botón Menú Móvil */}
             <div className="md:hidden flex items-center">
               <button onClick={toggleMenu} className="text-vivero-dark hover:text-vivero-purple focus:outline-none p-2">
                 {isOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
@@ -55,7 +59,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Menú Desplegable Móvil */}
         {isOpen && (
           <div className="md:hidden bg-vivero-cream border-t border-vivero-green/20 px-4 pt-2 pb-6 shadow-xl absolute w-full">
             <div className="flex flex-col space-y-2">
@@ -71,10 +74,9 @@ export default function App() {
       </header>
 
       <main>
-        {/* SECCIÓN HERO (Banner Principal) */}
+        {/* HERO */}
         <section id="inicio" className="relative h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0">
-            {/* Imagen de fondo. Puedes cambiarla descargando una y usando src="/hero.jpg" */}
             <img src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=2070&auto=format&fit=crop" alt="Fondo Vivero" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-vivero-dark/90 to-vivero-dark/60 mix-blend-multiply"></div>
           </div>
@@ -99,7 +101,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* SECCIÓN CARACTERÍSTICAS (Por qué elegirnos) */}
+        {/* CARACTERÍSTICAS */}
         <section className="py-12 bg-white border-b border-vivero-cream">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -128,7 +130,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* SECCIÓN CATEGORÍAS (Catálogo Visual) */}
+        {/* CATEGORÍAS */}
         <section id="categorias" className="py-20 bg-vivero-cream">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
@@ -138,8 +140,9 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              
               {/* Tarjeta 1 */}
-              <div className="group relative rounded-3xl overflow-hidden shadow-lg cursor-pointer aspect-[4/5]">
+              <Link to="/interior" className="group relative rounded-3xl overflow-hidden shadow-lg cursor-pointer aspect-[4/5] block">
                 <img src="/plantas-interior.jpg" alt="Plantas de Interior" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-vivero-dark/90 via-vivero-dark/20 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-300 group-hover:-translate-y-2">
@@ -147,10 +150,10 @@ export default function App() {
                   <p className="text-vivero-cream/80 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Perfectas para dar vida a salas, oficinas y habitaciones.</p>
                   <span className="text-vivero-yellow font-medium flex items-center">Ver selección <ArrowRight className="w-4 h-4 ml-1" /></span>
                 </div>
-              </div>
+              </Link>
 
               {/* Tarjeta 2 */}
-              <div className="group relative rounded-3xl overflow-hidden shadow-lg cursor-pointer aspect-[4/5]">
+              <Link to="/frutales" className="group relative rounded-3xl overflow-hidden shadow-lg cursor-pointer aspect-[4/5] block">
                 <img src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?q=80&w=800&auto=format&fit=crop" alt="Árboles Frutales" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-vivero-dark/90 via-vivero-dark/20 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-300 group-hover:-translate-y-2">
@@ -158,10 +161,10 @@ export default function App() {
                   <p className="text-vivero-cream/80 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Cultiva tus propios frutos con nuestras especies nativas e injertos.</p>
                   <span className="text-vivero-yellow font-medium flex items-center">Ver selección <ArrowRight className="w-4 h-4 ml-1" /></span>
                 </div>
-              </div>
+              </Link>
 
               {/* Tarjeta 3 */}
-              <div className="group relative rounded-3xl overflow-hidden shadow-lg cursor-pointer aspect-[4/5]">
+              <Link to="/exterior" className="group relative rounded-3xl overflow-hidden shadow-lg cursor-pointer aspect-[4/5] block">
                 <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?q=80&w=800&auto=format&fit=crop" alt="Plantas Ornamentales" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-vivero-dark/90 via-vivero-dark/20 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-300 group-hover:-translate-y-2">
@@ -169,19 +172,68 @@ export default function App() {
                   <p className="text-vivero-cream/80 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Diseña jardines espectaculares con flores y follajes de temporada.</p>
                   <span className="text-vivero-yellow font-medium flex items-center">Ver selección <ArrowRight className="w-4 h-4 ml-1" /></span>
                 </div>
+              </Link>
+
+            </div>
+          </div>
+        </section>
+        {/* SERVICIOS */}
+        <section id="servicios" className="py-20 bg-white border-t border-vivero-cream">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-vivero-dark font-serif mb-4">Nuestros Servicios</h2>
+              <div className="w-24 h-1 bg-vivero-green mx-auto rounded-full mb-6"></div>
+              <p className="text-lg text-vivero-dark/70 max-w-2xl mx-auto">Soluciones integrales para tus proyectos verdes, paisajismo y compras comerciales.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Servicio 1: Asesoría */}
+              <div className="bg-vivero-cream p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-vivero-green/10 flex flex-col h-full">
+                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm text-vivero-green">
+                  <BookOpen className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-bold text-vivero-dark font-serif mb-4">Asesoría Técnica</h3>
+                <p className="text-vivero-dark/70 flex-grow">Orientación profesional para el cuidado de tus plantas, control de plagas, fertilización y adaptación al clima local.</p>
+                <button onClick={() => solicitarServicio('Asesoría Técnica')} className="mt-8 text-vivero-green font-bold flex items-center justify-center w-full hover:text-vivero-purple transition-colors bg-white py-3 rounded-xl shadow-sm border border-vivero-green/20">
+                  Cotizar servicio <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
+              </div>
+
+              {/* Servicio 2: Mayoristas */}
+              <div className="bg-vivero-cream p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-vivero-green/10 flex flex-col h-full">
+                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm text-vivero-purple">
+                  <Package className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-bold text-vivero-dark font-serif mb-4">Ventas por Mayor</h3>
+                <p className="text-vivero-dark/70 flex-grow">Precios especiales y cotizaciones a medida para paisajistas, constructoras, oficinas y proyectos de reforestación.</p>
+                <button onClick={() => solicitarServicio('Ventas por Mayor')} className="mt-8 text-vivero-purple font-bold flex items-center justify-center w-full hover:text-vivero-dark transition-colors bg-white py-3 rounded-xl shadow-sm border border-vivero-purple/20">
+                  Solicitar catálogo <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
+              </div>
+
+              {/* Servicio 3: Diseño */}
+              <div className="bg-vivero-cream p-8 rounded-3xl text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-vivero-green/10 flex flex-col h-full">
+                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm text-vivero-yellow">
+                  <Palette className="w-8 h-8" />
+                </div>
+                <h3 className="text-2xl font-bold text-vivero-dark font-serif mb-4">Diseño de Jardines</h3>
+                <p className="text-vivero-dark/70 flex-grow">Planificación y creación de espacios armónicos adaptados a la arquitectura de tu hogar y las condiciones del terreno.</p>
+                <button onClick={() => solicitarServicio('Diseño de Jardines')} className="mt-8 text-vivero-yellow font-bold flex items-center justify-center w-full hover:text-vivero-dark transition-colors bg-white py-3 rounded-xl shadow-sm border border-vivero-yellow/50">
+                  Agendar visita <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* SECCIÓN NOSOTROS */}
+
+        {/* NOSOTROS */}
         <section id="nosotros" className="py-20 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
               <div className="relative mb-12 lg:mb-0">
                 <div className="absolute -inset-4 bg-vivero-green/10 rounded-3xl transform -rotate-3 transition-transform hover:rotate-0 duration-500"></div>
                 <img className="relative rounded-2xl shadow-2xl object-cover w-full h-[500px]" src="/plantas.jpg" alt="Interior del Vivero Pensamiento" />
-                {/* Cuadro flotante de experiencia */}
                 <div className="absolute -bottom-6 -right-6 bg-vivero-purple text-white p-6 rounded-2xl shadow-xl hidden sm:block">
                   <p className="text-4xl font-bold font-serif">100%</p>
                   <p className="text-sm font-medium">Calidad natural</p>
@@ -219,12 +271,11 @@ export default function App() {
         </section>
       </main>
       
-      {/* PIE DE PÁGINA (Footer Completo) */}
+      {/* FOOTER */}
       <footer id="contacto" className="bg-vivero-dark text-vivero-cream pt-16 pb-8 border-t-8 border-vivero-purple">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             
-            {/* Columna 1: Marca */}
             <div className="md:col-span-1">
               <div className="bg-white inline-block p-2 rounded-xl mb-6">
                 <img src="/logo.png" alt="Logo Vivero" className="h-16 w-auto" />
@@ -239,7 +290,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Columna 2: Enlaces */}
             <div>
               <h3 className="text-lg font-bold font-serif mb-6 text-white">Explorar</h3>
               <ul className="space-y-4 text-vivero-cream/80">
@@ -250,7 +300,6 @@ export default function App() {
               </ul>
             </div>
 
-            {/* Columna 3: Legal */}
             <div>
               <h3 className="text-lg font-bold font-serif mb-6 text-white">Servicios</h3>
               <ul className="space-y-4 text-vivero-cream/80">
@@ -261,7 +310,6 @@ export default function App() {
               </ul>
             </div>
 
-            {/* Columna 4: Contacto */}
             <div>
               <h3 className="text-lg font-bold font-serif mb-6 text-white">Contacto</h3>
               <ul className="space-y-4 text-vivero-cream/80">
@@ -281,7 +329,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Línea Divisoria y Copyright */}
           <div className="border-t border-vivero-cream/20 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-vivero-cream/50">
             <p>&copy; {new Date().getFullYear()} Vivero Pensamiento. Todos los derechos reservados.</p>
             <p className="mt-4 md:mt-0">Diseñado con ❤️ en Guatemala</p>
