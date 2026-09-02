@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -180,5 +183,232 @@
   &::after {
     right: 0;
     border-right-color: var(--border);
+  }
+}
+
+
+/*CONTACT SECTION*/
+
+
+.contact-section {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FBF9F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 6%;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #1F1F1F;
+}
+
+.contact-container {
+  max-width: 1200px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+/* Columna izquierda */
+.contact-info .main-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 3rem;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  margin-bottom: 25px;
+  color: #1F1F1F;
+}
+
+.contact-info .description {
+  color: #666666;
+  font-size: 1rem;
+  line-height: 1.65;
+  margin-bottom: 40px;
+  max-width: 480px;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.95rem;
+  color: #1F1F1F;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.detail-item:hover {
+  opacity: 0.75;
+}
+
+.detail-item .icon {
+  stroke-width: 1.5;
+}
+
+/* Columna derecha: Formulario */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-group {
+  position: relative;
+  width: 100%;
+}
+
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+  width: 100%;
+  padding: 16px 22px;
+  background-color: #FFFFFF;
+  border: 1px solid transparent;
+  border-radius: 35px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  color: #1F1F1F;
+  outline: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: #9E9E9E;
+}
+
+.contact-form input:focus,
+.contact-form select:focus,
+.contact-form textarea:focus {
+  border-color: #CFCFCF;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.contact-form textarea {
+  border-radius: 20px;
+  resize: vertical;
+  min-height: 130px;
+}
+
+/* Select desplegable */
+.contact-form select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+  cursor: pointer;
+}
+
+/* Campo teléfono */
+.phone-group input {
+  padding-left: 78px;
+}
+
+.country-badge {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.chevron-icon {
+  color: #666666;
+}
+
+/* Botón Enviar */
+.btn-submit {
+  align-self: flex-start;
+  background-color: #2B3D2E;
+  color: #FFFFFF;
+  border: none;
+  padding: 14px 44px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-top: 5px;
+}
+
+.btn-submit:hover {
+  background-color: #1F2E22;
+}
+
+.btn-submit:active {
+  transform: scale(0.98);
+}
+
+/* Botón WhatsApp Flotante */
+.whatsapp-float {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+  background-color: #25D366;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  text-decoration: none;
+  z-index: 1000;
+  transition: transform 0.2s;
+  
+  /*borde blanco */
+  border: 3px solid #FFFFFF !important;
+  outline: none !important;
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.08);
+}
+
+.whatsapp-float svg {
+  color: #FFFFFF;
+}
+
+
+
+/* Responsividad */
+@media (max-width: 992px) {
+  .contact-container {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .contact-info .main-title {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  .btn-submit {
+    width: 100%;
   }
 }
