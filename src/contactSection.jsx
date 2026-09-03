@@ -11,6 +11,8 @@ export default function ContactSection() {
     mensaje: ''
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -19,9 +21,44 @@ export default function ContactSection() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Datos enviados:', formData);
+    setLoading(true);
+
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_RESEND_API_KEY}`
+        },
+        body: JSON.stringify({
+          from: 'Vivero Pensamiento <onboarding@resend.dev>',
+          to: [formData.email, 'viveropensamientogt@gmail.com'],
+          subject: `🌿 Nuevo Contacto / Solicitud: ${formData.motivo}`,
+          text: `Hola ${formData.nombre} ${formData.apellido},\n\nHemos recibido tu información correctamente en Vivero Pensamiento. Uno de nuestros asesores se pondrá en contacto contigo muy pronto.\n\nDetalles de tu solicitud:\n- Teléfono: ${formData.telefono}\n- Motivo: ${formData.motivo}\n- Mensaje: ${formData.mensaje}\n\n¡Gracias por confiar en nosotros!`
+        })
+      });
+
+      if (response.ok) {
+        alert('¡Mensaje enviado con éxito! Te hemos enviado un correo de confirmación.');
+        setFormData({
+          nombre: '',
+          apellido: '',
+          telefono: '',
+          email: '',
+          motivo: '',
+          mensaje: ''
+        });
+      } else {
+        alert('Hubo un error al enviar el mensaje.');
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+      alert('No se pudo conectar con el servicio de correo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,13 +76,12 @@ export default function ContactSection() {
           </p>
 
           <div className="contact-details">
-            <a href="tel:+50251544669" className="detail-item">
+            <a href="tel:+50244508589" className="detail-item">
               <Phone className="icon" size={20} strokeWidth={1.5} />
               <span>(+502) 4450-8589</span>
             </a>
 
-            
-            <a href="mailto:info@plant.gt" className="detail-item">
+            <a href="mailto:viveropensamientogt@gmail.com" className="detail-item">
               <Mail className="icon" size={20} strokeWidth={1.5} />
               <span>viveropensamientogt@gmail.com</span>
             </a>
@@ -130,16 +166,15 @@ export default function ContactSection() {
               ></textarea>
             </div>
 
-            <button type="submit" className="btn-submit">
-              Enviar
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? 'Enviando...' : 'Enviar'}
             </button>
           </form>
         </div>
 
       </div>
 
-
-   {/* Botón flotante de WhatsApp */}
+      {/* Botón flotante de WhatsApp */}
       <a 
         href="https://wa.me/50240794985" 
         target="_blank" 
