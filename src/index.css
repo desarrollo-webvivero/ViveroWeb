@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+  --color-vivero-dark: #26432D;   /* El verde oscuro de las letras y tallos */
+  --color-vivero-green: #6A8F59;  /* El verde medio de las hojas */
+  --color-vivero-purple: #5B376C; /* El morado oscuro de los pétalos */
+  --color-vivero-yellow: #F1C52A; /* El amarillo del centro */
+  --color-vivero-cream: #F6F5F0;  /* El color crema del fondo del logo */
+}

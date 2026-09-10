@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  web-vivero:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vivero_spa_container
+    ports:
+      - "8080:80"
+    restart: unless-stopped
