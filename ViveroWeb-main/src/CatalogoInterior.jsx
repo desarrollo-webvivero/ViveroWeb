@@ -52,4 +52,31 @@ export default function CatalogoInterior() {
       </div>
     </div>
   );
-}
+} 
+
+const agregarAlCarrito = async (producto, cantidadDeseada) => {
+  try {
+    const respuesta = await fetch('http://localhost:8080/api/productos/verificar-stock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productoId: producto.id,
+        cantidad: cantidadDeseada
+      })
+    });
+
+    const data = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(data.mensaje); // Muestra "Cantidad insuficiente..."
+      return;
+    }
+
+    // Si hay stock, se agrega al carrito local
+    addToCart({ ...producto, cantidad: cantidadDeseada });
+    alert("Producto agregado al carrito correctamente");
+
+  } catch (error) {
+    console.error("Error al verificar stock:", error);
+  }
+};
