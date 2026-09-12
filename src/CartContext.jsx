@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
 import { X, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
@@ -7,6 +8,7 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const agregarAlCarrito = (producto) => {
     setCart((prev) => {
@@ -20,28 +22,32 @@ export const CartProvider = ({ children }) => {
   };
 
   const handleProcederPago = () => {
-  const clienteSesion = localStorage.getItem('cliente');
+    setIsOpen(false);
+    const clienteSesion = localStorage.getItem('cliente');
 
-  if (!clienteSesion) {
-    // Si no está logueado, redirige al Login/Registro
-    navigate('/login-cliente', { state: { redirectTo: '/pago' } });
-  } else {
-    // Si está logueado, avanza directamente a la vista de Pago
-    navigate('/pago');
-  }
-};
+    if (!clienteSesion) {
+      navigate('/login-cliente', { state: { redirectTo: '/pago' } });
+    } else {
+      navigate('/pago');
+    }
+  };
 
   const eliminarDelCarrito = (id) => setCart((prev) => prev.filter((item) => item.id !== id));
   
-  // Cálculo de totales
-  const total = cart.reduce((sum, item) => sum + (parseFloat(item.precio.replace('Q', '')) * item.cantidad), 0);
+  // Cálculo de totales (Soporta tanto texto antiguo como números puros de Oracle)
+  const total = cart.reduce((sum, item) => {
+    const precioNumerico = typeof item.precio === 'string' 
+      ? parseFloat(item.precio.replace('Q', '')) 
+      : parseFloat(item.precio);
+    return sum + ((precioNumerico || 0) * item.cantidad);
+  }, 0);
+  
   const totalItems = cart.reduce((sum, item) => sum + item.cantidad, 0);
 
   return (
     <CartContext.Provider value={{ cart, agregarAlCarrito, setIsOpen }}>
       {children}
 
-      {/* BOTÓN FLOTANTE DEL CARRITO */}
       <button 
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 bg-vivero-yellow text-vivero-dark p-4 rounded-full shadow-2xl hover:bg-yellow-400 transition-all transform hover:scale-110 hover:-translate-y-2 border-2 border-white flex items-center justify-center"
@@ -54,7 +60,6 @@ export const CartProvider = ({ children }) => {
         )}
       </button>
 
-      {/* PANEL VISUAL DEL CARRITO */}
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex justify-end">
           <div className="absolute inset-0 bg-vivero-dark/60 backdrop-blur-sm cursor-pointer" onClick={() => setIsOpen(false)}></div>
@@ -75,10 +80,11 @@ export const CartProvider = ({ children }) => {
               ) : (
                 cart.map((item) => (
                   <div key={item.id} className="flex items-center bg-white p-4 rounded-2xl shadow-sm border border-vivero-green/10">
-                    <img src={item.img} alt={item.nombre} className="w-16 h-16 rounded-xl object-cover" />
+                    {/* Soporta tanto imagenUrl (Oracle) como img (Formato viejo) */}
+                    <img src={item.imagenUrl || item.img} alt={item.nombre} className="w-16 h-16 rounded-xl object-cover bg-gray-100" />
                     <div className="ml-4 flex-1">
                       <h4 className="font-bold text-vivero-dark">{item.nombre}</h4>
-                      <p className="text-vivero-purple font-medium">{item.precio} x {item.cantidad}</p>
+                      <p className="text-vivero-purple font-medium">Q{item.precio} x {item.cantidad}</p>
                     </div>
                     <button onClick={() => eliminarDelCarrito(item.id)} className="p-2 text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
                       <Trash2 className="w-5 h-5" />
@@ -94,7 +100,10 @@ export const CartProvider = ({ children }) => {
                   <span>Total estimado:</span>
                   <span>Q{total.toFixed(2)}</span>
                 </div>
-                <button className="w-full bg-vivero-purple text-white py-4 rounded-xl font-bold hover:bg-opacity-90 shadow-lg flex justify-center items-center transition-transform hover:-translate-y-1">
+                <button 
+                  onClick={handleProcederPago}
+                  className="w-full bg-vivero-purple text-white py-4 rounded-xl font-bold hover:bg-opacity-90 shadow-lg flex justify-center items-center transition-transform hover:-translate-y-1"
+                >
                   Proceder al pago <ArrowRight className="w-5 h-5 ml-2" />
                 </button>
               </div>
