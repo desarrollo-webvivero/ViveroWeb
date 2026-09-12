@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import { apiService } from './services/api';
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -8,19 +7,13 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const login = async (password) => {
-   try {
-      // Reemplaza la validación local ('vivero2026') por la consulta a Spring Boot
-      const data = await apiService.login(password);
-      if (data.success || data.token) {
-        setIsAuthenticated(true);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error al autenticar:", error);
-      return false;
+  const login = (password) => {
+    // Contraseña maestra temporal. Luego la validaremos con tu API de Spring Boot
+    if (password === 'vivero2026') {
+      setIsAuthenticated(true);
+      return true;
     }
+    return false;
   };
 
   const logout = () => setIsAuthenticated(false);
