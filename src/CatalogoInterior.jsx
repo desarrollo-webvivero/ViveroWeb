@@ -2,29 +2,27 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from './CartContext';
-import { verificarStock } from './services/api';
-
-const BASE_URL = 'https://vivero-backend-2.onrender.com';
+import { apiService, verificarStock } from './services/api';
 
 export default function CatalogoInterior() {
   const { agregarAlCarrito } = useCart();
   const [plantas, setPlantas] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // Cargar productos reales desde la API (Oracle)
   useEffect(() => {
-    fetch(`${BASE_URL}/api/productos`)
-      .then((res) => res.json())
-      .then((data) => {
-        // Filtrar opcionalmente por la categoría 1 (Interior)
-        const interior = data.filter((p) => p.categoria && p.categoria.id === 1);
-        setPlantas(interior.length > 0 ? interior : data);
+    const cargarDatos = async () => {
+      try {
+        const data = await apiService.obtenerProductos();
+        // Filtramos estrictamente para la Categoría 1 (Interior)
+        const interior = data.filter((p) => p.categoria?.id === 1 || p.categoria?.id === "1");
+        setPlantas(interior);
+      } catch (err) {
+        console.error('Error al cargar productos:', err);
+      } finally {
         setCargando(false);
-      })
-      .catch((err) => {
-        console.error('Error al cargar productos de Oracle:', err);
-        setCargando(false);
-      });
+      }
+    };
+    cargarDatos();
   }, []);
 
   const handleAgregar = async (planta) => {
@@ -37,12 +35,18 @@ export default function CatalogoInterior() {
         return;
       }
 
-      agregarAlCarrito(planta);
+      // Pasamos los datos formateados al carrito
+      agregarAlCarrito({
+        id: planta.id,
+        nombre: planta.nombre,
+        precio: planta.precioBase || planta.precio,
+        imagenUrl: planta.imagenUrl || planta.img
+      });
       alert(`¡${planta.nombre} agregada al carrito!`);
+      
     } catch (err) {
       console.error('Error al verificar stock:', err);
-      // Agregar localmente en caso de fallback
-      agregarAlCarrito(planta);
+      alert('Hubo un error de conexión al verificar la disponibilidad.');
     }
   };
 
@@ -61,12 +65,18 @@ export default function CatalogoInterior() {
 
         {cargando ? (
           <p className="text-center text-vivero-dark font-medium">Cargando productos desde la base de datos...</p>
+        ) : plantas.length === 0 ? (
+          <p className="text-center text-vivero-dark/50 mt-10">No hay plantas de interior disponibles en este momento.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {plantas.map((planta) => (
               <div key={planta.id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow overflow-hidden group border border-vivero-cream">
                 <div className="h-64 bg-gray-200 overflow-hidden relative">
-                  <img src={planta.imagenUrl || planta.img || '/plantas-interior.jpg'} alt={planta.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img 
+                    src={planta.imagenUrl || planta.img || '/plantas-interior.jpg'} 
+                    alt={planta.nombre} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                  />
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-vivero-dark mb-2 font-serif">{planta.nombre}</h3>
