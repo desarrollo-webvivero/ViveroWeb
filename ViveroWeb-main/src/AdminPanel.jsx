@@ -7,8 +7,8 @@ export default function AdminPanel() {
   const [producto, setProducto] = useState({
     nombre: '',
     precio: '',
-    stock: '',
-    categoria: '1', // Valor por defecto correspondiente a ID 1 (Plantas de Interior)
+    stock: '10',
+    categoria: '1',
     descripcion: '',
     imagenUrl: ''
   });
@@ -16,29 +16,32 @@ export default function AdminPanel() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      // 1. Mapeamos y convertimos los datos al formato exacto que espera Spring Boot
-      const productoParaEnviar = {
-        nombre: producto.nombre,
-        precioBase: parseFloat(producto.precio),
-        descripcion: producto.descripcion,
-        imagenUrl: producto.imagenUrl,
-        stockDisponible: parseInt(producto.stock || 10, 10), // Usa el stock del form o 10 por defecto
-        categoria: {
-          id: parseInt(producto.categoria, 10) // Convierte directamente el valor ("1", "2", "3") a Integer
-        }
-      };
 
-      // 2. Enviamos el objeto mapeado a la API
-      await apiService.crearProducto(productoParaEnviar);
+    // 1. Mapeo explícito para la entidad Producto de Spring Boot
+    const payload = {
+      nombre: producto.nombre,
+      precioBase: parseFloat(producto.precio),
+      descripcion: producto.descripcion,
+      imagenUrl: producto.imagenUrl,
+      stockDisponible: parseInt(producto.stock, 10),
+      categoria: {
+        id: parseInt(producto.categoria, 10)
+      }
+    };
+
+    console.log("Enviando Payload real a Render:", payload);
+
+    try {
+      // 2. Envío a la API real
+      await apiService.crearProducto(payload);
 
       setMensaje(`¡Planta "${producto.nombre}" agregada al catálogo exitosamente!`);
 
-      // 3. Limpiamos el formulario
+      // 3. Reset del formulario
       setProducto({
         nombre: '',
         precio: '',
-        stock: '',
+        stock: '10',
         categoria: '1',
         descripcion: '',
         imagenUrl: ''
