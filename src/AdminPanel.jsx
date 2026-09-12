@@ -41,8 +41,8 @@ export default function AdminPanel() {
       setProducto({
         nombre: '',
         precio: '',
-        stock: '10',
-        categoria: '1',
+        stock: '',
+        categoria: '',
         descripcion: '',
         imagenUrl: ''
       });
