@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
 import { X, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+// ELIMINAMOS la importación de useNavigate que causó el colapso
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
@@ -8,7 +8,7 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
+  // ELIMINAMOS const navigate = useNavigate();
 
   const agregarAlCarrito = (producto) => {
     setCart((prev) => {
@@ -26,9 +26,11 @@ export const CartProvider = ({ children }) => {
     const clienteSesion = localStorage.getItem('cliente');
 
     if (!clienteSesion) {
-      navigate('/login-cliente', { state: { redirectTo: '/pago' } });
+      // Guardamos la intención de ir a pago y usamos navegación nativa
+      localStorage.setItem('redirectTo', '/pago');
+      window.location.href = '/login-cliente';
     } else {
-      navigate('/pago');
+      window.location.href = '/pago';
     }
   };
 
@@ -80,7 +82,6 @@ export const CartProvider = ({ children }) => {
               ) : (
                 cart.map((item) => (
                   <div key={item.id} className="flex items-center bg-white p-4 rounded-2xl shadow-sm border border-vivero-green/10">
-                    {/* Soporta tanto imagenUrl (Oracle) como img (Formato viejo) */}
                     <img src={item.imagenUrl || item.img} alt={item.nombre} className="w-16 h-16 rounded-xl object-cover bg-gray-100" />
                     <div className="ml-4 flex-1">
                       <h4 className="font-bold text-vivero-dark">{item.nombre}</h4>
