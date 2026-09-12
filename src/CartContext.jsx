@@ -19,6 +19,18 @@ export const CartProvider = ({ children }) => {
     setIsOpen(true);
   };
 
+  const handleProcederPago = () => {
+  const clienteSesion = localStorage.getItem('cliente');
+
+  if (!clienteSesion) {
+    // Si no está logueado, redirige al Login/Registro
+    navigate('/login-cliente', { state: { redirectTo: '/pago' } });
+  } else {
+    // Si está logueado, avanza directamente a la vista de Pago
+    navigate('/pago');
+  }
+};
+
   const eliminarDelCarrito = (id) => setCart((prev) => prev.filter((item) => item.id !== id));
   
   // Cálculo de totales
