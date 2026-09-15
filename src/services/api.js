@@ -2,6 +2,75 @@ const BASE_URL = 'https://vivero-backend-2.onrender.com';
 
 
 
+// Función auxiliar para manejar respuestas de la API de forma limpia
+async function handleResponse(response) {
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Ocurrió un error en el servidor');
+  }
+  return data;
+}
+
+export const api = {
+  // 1. Iniciar Sesión
+  login: async (email, password) => {
+    const response = await fetch(`${BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    return handleResponse(response);
+  },
+
+  // 2. Registrar Usuario (Dispara el envío de correo con código)
+  register: async ({ nombre, email, password }) => {
+    const response = await fetch(`${BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, email, password }),
+    });
+    return handleResponse(response);
+  },
+
+  // 3. Verificar Código de 6 Dígitos
+  verifyEmail: async ({ email, codigo }) => {
+    const response = await fetch(`${BASE_URL}/auth/verify-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, codigo }),
+    });
+    return handleResponse(response);
+  },
+
+  // 4. Crear Orden de Pago en PayPal (Backend consulta precios reales)
+  createPayPalOrder: async (cartItems) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${BASE_URL}/payments/create-paypal-order`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // Autenticación por JWT
+      },
+      body: JSON.stringify({ items: cartItems }),
+    });
+    return handleResponse(response);
+  },
+
+  // 5. Capturar Pago de PayPal (Confirma que el cliente pagó)
+  capturePayPalOrder: async (orderId) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${BASE_URL}/payments/capture-paypal-order`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ orderId }),
+    });
+    return handleResponse(response);
+  }
+};
+
 export async function loginCliente(credenciales) {
   const response = await fetch(`${BASE_URL}/api/clientes/login`, {
     method: 'POST',
