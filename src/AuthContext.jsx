@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { api } from './services/api';
 
 // 1. Crear el contexto global
 const AuthContext = createContext();
