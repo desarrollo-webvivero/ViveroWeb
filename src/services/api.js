@@ -1,4 +1,4 @@
-import axios from 'axios';
+
 const BASE_URL = 'https://vivero-backend-2.onrender.com';
 
 // Funciones individuales
