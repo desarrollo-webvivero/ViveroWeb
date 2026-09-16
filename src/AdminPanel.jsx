@@ -7,8 +7,8 @@ export default function AdminPanel() {
   const [producto, setProducto] = useState({
     nombre: '',
     precio: '',
-    stock: '10',
-    categoria: '1',
+    stock: '',
+    categoria: '',
     descripcion: '',
     imagenArchivo: null,
     imagenPreview: ''
