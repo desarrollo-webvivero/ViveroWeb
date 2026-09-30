@@ -7,7 +7,7 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [mostrarOpcionesPago, setMostrarOpcionesPago] = useState(false); // <-- Nuevo estado para el menú de pago
+  const [mostrarOpcionesPago, setMostrarOpcionesPago] = useState(false);
 
   const agregarAlCarrito = (producto) => {
     setCart((prev) => {
@@ -22,13 +22,14 @@ export const CartProvider = ({ children }) => {
 
   const eliminarDelCarrito = (id) => setCart((prev) => prev.filter((item) => item.id !== id));
   
-  // Cerrar carrito y reiniciar el menú de pago
+  // Función vital para limpiar el carrito después de una compra exitosa
+  const vaciarCarrito = () => setCart([]);
+  
   const cerrarCarrito = () => {
     setIsOpen(false);
-    setTimeout(() => setMostrarOpcionesPago(false), 300); // Lo reinicia cuando termina la animación
+    setTimeout(() => setMostrarOpcionesPago(false), 300); 
   };
 
-  // Cálculo de totales
   const total = cart.reduce((sum, item) => {
     const precioNumerico = typeof item.precio === 'string' 
       ? parseFloat(item.precio.replace('Q', '')) 
@@ -43,7 +44,7 @@ export const CartProvider = ({ children }) => {
   // ==========================================
 
   const pagarConWhatsApp = () => {
-    const numeroVivero = "50200000000"; // <--- CAMBIA ESTO POR TU NÚMERO DE WHATSAPP REAL (Ej. 50244556677)
+    const numeroVivero = "50244508589"; 
     
     let mensaje = `🌿 *¡Hola ViveroWeb! Me gustaría realizar un pedido* 🌿\n\n`;
     mensaje += `*Resumen de mi carrito:*\n`;
@@ -56,7 +57,6 @@ export const CartProvider = ({ children }) => {
     mensaje += `\n💰 *Total a pagar:* Q${total.toFixed(2)}\n\n`;
     mensaje += `Quedo a la espera de las instrucciones para el pago y envío. ¡Gracias!`;
 
-    // Codificamos el texto para que los espacios y saltos de línea funcionen en la URL
     const url = `https://wa.me/${numeroVivero}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   };
@@ -64,25 +64,22 @@ export const CartProvider = ({ children }) => {
   const pagarContraEntrega = () => {
     const clienteSesion = localStorage.getItem('cliente');
     if (!clienteSesion) {
-      alert("Por favor, inicia sesión o regístrate para usar el pago Contra Entrega y saber a dónde enviar tu pedido.");
-      localStorage.setItem('redirectTo', '/');
+      alert("Por favor, inicia sesión o regístrate para continuar con tu compra.");
+      localStorage.setItem('redirectTo', '/pago-contra-entrega');
       window.location.href = '/login-cliente';
     } else {
-      // Aquí más adelante conectaremos con Spring Boot para guardar la orden en la BD
-      alert("¡Tu pedido contra entrega ha sido registrado con éxito! Te contactaremos pronto.");
-      setCart([]); // Vaciamos el carrito
       cerrarCarrito();
+      window.location.href = '/pago-contra-entrega';
     }
   };
 
   const pagarConPayPal = () => {
-    // Redirige a una vista de PayPal (puedes crear un componente PagoPayPal.jsx luego)
     alert("Redirigiendo a la pasarela segura de PayPal...");
-    // window.location.href = '/pago-paypal'; 
   };
 
   return (
-    <CartContext.Provider value={{ cart, agregarAlCarrito, setIsOpen }}>
+    // Agregamos vaciarCarrito aquí para que el formulario final pueda usarlo
+    <CartContext.Provider value={{ cart, agregarAlCarrito, setIsOpen, vaciarCarrito }}>
       {children}
 
       <button 
@@ -137,7 +134,6 @@ export const CartProvider = ({ children }) => {
                   <span>Q{total.toFixed(2)}</span>
                 </div>
                 
-                {/* SI NO SE HAN MOSTRADO LAS OPCIONES, MUESTRA EL BOTÓN PRINCIPAL */}
                 {!mostrarOpcionesPago ? (
                   <button 
                     onClick={() => setMostrarOpcionesPago(true)}
@@ -146,8 +142,6 @@ export const CartProvider = ({ children }) => {
                     Proceder al pago <ArrowRight className="w-5 h-5 ml-2" />
                   </button>
                 ) : (
-                  
-                  /* MENÚ DE OPCIONES DE PAGO QUE APARECE AL HACER CLIC */
                   <div className="space-y-3 animate-fade-in">
                     <p className="text-sm font-bold text-center text-vivero-dark mb-4 border-b border-vivero-green/20 pb-2">
                       Selecciona tu método de pago
@@ -170,10 +164,8 @@ export const CartProvider = ({ children }) => {
                     </button>
                   </div>
                 )}
-
               </div>
             )}
-
           </div>
         </div>
       )}
