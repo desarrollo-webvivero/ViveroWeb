@@ -1,13 +1,23 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { X, ShoppingBag, Trash2, ArrowRight, MessageCircle, Truck, CreditCard } from 'lucide-react';
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  // 1. INICIALIZAMOS EL CARRITO DESDE LA MEMORIA DEL NAVEGADOR
+  const [cart, setCart] = useState(() => {
+    const carritoGuardado = localStorage.getItem('carrito_vivero');
+    return carritoGuardado ? JSON.parse(carritoGuardado) : [];
+  });
+  
   const [isOpen, setIsOpen] = useState(false);
   const [mostrarOpcionesPago, setMostrarOpcionesPago] = useState(false);
+
+  // 2. GUARDADO AUTOMÁTICO: Cada vez que el carrito cambia, lo guardamos.
+  useEffect(() => {
+    localStorage.setItem('carrito_vivero', JSON.stringify(cart));
+  }, [cart]);
 
   const agregarAlCarrito = (producto) => {
     setCart((prev) => {
@@ -22,8 +32,11 @@ export const CartProvider = ({ children }) => {
 
   const eliminarDelCarrito = (id) => setCart((prev) => prev.filter((item) => item.id !== id));
   
-  // Función vital para limpiar el carrito después de una compra exitosa
-  const vaciarCarrito = () => setCart([]);
+  // 3. VACIAR CARRITO: Borramos el estado y la memoria.
+  const vaciarCarrito = () => {
+    setCart([]);
+    localStorage.removeItem('carrito_vivero');
+  };
   
   const cerrarCarrito = () => {
     setIsOpen(false);
@@ -62,15 +75,9 @@ export const CartProvider = ({ children }) => {
   };
 
   const pagarContraEntrega = () => {
-    const clienteSesion = localStorage.getItem('cliente');
-    if (!clienteSesion) {
-      alert("Por favor, inicia sesión o regístrate para continuar con tu compra.");
-      localStorage.setItem('redirectTo', '/pago-contra-entrega');
-      window.location.href = '/login-cliente';
-    } else {
-      cerrarCarrito();
-      window.location.href = '/pago-contra-entrega';
-    }
+    cerrarCarrito();
+    // Te enviará directo al formulario sin pedir login por ahora para que puedas probarlo
+    window.location.href = '/pago-contra-entrega';
   };
 
   const pagarConPayPal = () => {
@@ -78,7 +85,6 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    // Agregamos vaciarCarrito aquí para que el formulario final pueda usarlo
     <CartContext.Provider value={{ cart, agregarAlCarrito, setIsOpen, vaciarCarrito }}>
       {children}
 
