@@ -10,6 +10,7 @@ import LoginAdmin from './LoginAdmin.jsx'
 import { CartProvider } from './CartContext.jsx'
 import { AuthProvider, RutaProtegida } from './AuthContext.jsx'
 import './index.css'
+import PagoContraEntrega from './PagoContraEntrega';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -23,7 +24,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/frutales" element={<CatalogoFrutales />} />
             <Route path="/exterior" element={<CatalogoExterior />} />
             <Route path="/login" element={<LoginAdmin />} />
-
+            <Route path="/pago-contra-entrega" element={<PagoContraEntrega />} />   
             {/* Ruta Protegida (Privada) */}
             <Route path="/admin" element={
               <RutaProtegida>
