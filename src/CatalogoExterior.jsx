@@ -43,7 +43,6 @@ export default function CatalogoExterior() {
         precio: planta.precioBase || planta.precio,
         imagenUrl: planta.imagenUrl || planta.img
       });
-      alert(`¡${planta.nombre} agregada al carrito!`);
       
     } catch (err) {
       console.error('Error al verificar stock:', err);

@@ -42,7 +42,6 @@ export default function CatalogoFrutales() {
         precio: planta.precioBase || planta.precio,
         imagenUrl: planta.imagenUrl || planta.img
       });
-      alert(`¡${planta.nombre} agregada al carrito!`);
       
     } catch (err) {
       console.error('Error al verificar stock:', err);
