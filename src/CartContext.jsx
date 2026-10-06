@@ -59,15 +59,15 @@ export const CartProvider = ({ children }) => {
   const pagarConWhatsApp = () => {
     const numeroVivero = "50244508589"; 
     
-    let mensaje = `🌿¡Hola Vivero Pensamiento! Me gustaría realizar un pedido* 🌿\n\n`;
+    let mensaje = `¡Hola Vivero Pensamiento! Me gustaría realizar un pedido. \n\n`;
     mensaje += `Resumen de mi carrito:\n`;
     
     cart.forEach(item => {
       const precioNumerico = typeof item.precio === 'string' ? item.precio.replace('Q', '') : item.precio;
-      mensaje += `🔸 ${item.cantidad}x ${item.nombre} (Q${precioNumerico} c/u)\n`;
+      mensaje += ` ${item.cantidad}x ${item.nombre} (Q${precioNumerico} c/u)\n`;
     });
     
-    mensaje += `\n💰 *Total a pagar:* Q${total.toFixed(2)}\n\n`;
+    mensaje += `\n *Total a pagar:* Q${total.toFixed(2)}\n\n`;
     mensaje += `Quedo a la espera de las instrucciones para el pago y envío. ¡Gracias!`;
 
     const url = `https://wa.me/${numeroVivero}?text=${encodeURIComponent(mensaje)}`;
