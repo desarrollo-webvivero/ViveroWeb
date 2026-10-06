@@ -59,8 +59,8 @@ export const CartProvider = ({ children }) => {
   const pagarConWhatsApp = () => {
     const numeroVivero = "50244508589"; 
     
-    let mensaje = `🌿 *¡Hola ViveroWeb! Me gustaría realizar un pedido* 🌿\n\n`;
-    mensaje += `*Resumen de mi carrito:*\n`;
+    let mensaje = `🌿¡Hola Vivero Pensamiento! Me gustaría realizar un pedido* 🌿\n\n`;
+    mensaje += `Resumen de mi carrito:\n`;
     
     cart.forEach(item => {
       const precioNumerico = typeof item.precio === 'string' ? item.precio.replace('Q', '') : item.precio;
