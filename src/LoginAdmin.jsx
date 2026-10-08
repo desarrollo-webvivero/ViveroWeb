@@ -14,12 +14,12 @@ export default function LoginAdmin() {
     const exito = login(password);
     
     if (exito) {
-      navigate('/admin'); // Si es correcta, entra al panel
+      navigate('/dashboard'); // Si es correcta, entra al panel
     } else {
       setError('Contraseña incorrecta. Acceso denegado.');
       setPassword('');
     }
-    window.location.href = '/dashboard';
+   
   };
 
   return (
