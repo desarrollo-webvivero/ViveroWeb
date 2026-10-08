@@ -47,7 +47,7 @@ export default function DashboardAdmin() {
     
     const cargarDatosReales = async () => {
       try {
-        const respuesta = await fetch('https://vivero-backend-2.onrender.com/api/dashboard/resumen');
+        const respuesta = await fetch('https://vivero-backend-2.onrender.com/api/dashboard/resume');
         const data = await respuesta.json();
         setDashboardData(data);
       } catch (error) {
