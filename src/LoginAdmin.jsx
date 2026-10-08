@@ -14,7 +14,7 @@ export default function LoginAdmin() {
     const exito = login(password);
     
     if (exito) {
-      navigate('/dashboard'); // Si es correcta, entra al panel
+      navigate('/login'); // Si es correcta, entra al panel
     } else {
       setError('Contraseña incorrecta. Acceso denegado.');
       setPassword('');
