@@ -5,65 +5,37 @@ import { LayoutDashboard, PackagePlus, ShoppingBag, Users, LogOut, TrendingUp, P
 export default function DashboardAdmin() {
   const navigate = useNavigate();
   const [cargando, setCargando] = useState(true);
-  
-  // Estado que guardará el JSON idéntico al que enviará Spring Boot
+  const [errorApi, setErrorApi] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
 
   useEffect(() => {
-    /*
-    // =========================================================================
-    // 🚧 MOCK PARA EL COMPAÑERO DE BACKEND (ELIMINAR CUANDO LA API ESTÉ LISTA)
-    // =========================================================================
-    const datosSimulados = {
-      metricas: {
-        ventasDelMes: 4250.00,
-        ordenesDelMes: 24,
-        valorInventario: 15800.00,
-        totalPlantasActivas: 45,
-        alertasStockBajo: 2
-      },
-      plantasEnPeligro: [
-        { id: 1, nombre: "Monstera Deliciosa (Interior)", stockDisponible: 2, imagenUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d40?w=150" },
-        { id: 2, nombre: "Limonero (Frutal)", stockDisponible: 4, imagenUrl: "https://images.unsplash.com/photo-1590847926227-775c94cdfb08?w=150" }
-      ],
-      ultimosPedidos: [
-        { id: 1001, cliente: "María González", fecha: "Hace 2 horas", total: 350.00, estado: "Pendiente" },
-        { id: 1002, cliente: "Carlos Ruiz", fecha: "Ayer", total: 120.00, estado: "Entregado" },
-        { id: 1003, cliente: "Ana López", fecha: "Hace 2 días", total: 850.00, estado: "Entregado" }
-      ]
-    };
-
-    // Simulamos que la petición a la base de datos tarda 1 segundo
-    setTimeout(() => {
-      setDashboardData(datosSimulados);
-      setCargando(false);
-    }, 1000);
-*/
-    /* 
-    =========================================================================
-    🔌 CÓDIGO REAL A DESCOMENTAR CUANDO SPRING BOOT ESTÉ LISTO
-    =========================================================================
-    */
-    
     const cargarDatosReales = async () => {
       try {
         const respuesta = await fetch('https://vivero-backend-2.onrender.com/api/dashboard/resume');
+        if (!respuesta.ok) {
+          throw new Error(`HTTP Error: ${respuesta.status}`);
+        }
         const data = await respuesta.json();
         setDashboardData(data);
       } catch (error) {
-        console.error("Error al conectar con Oracle/SpringBoot:", error);
+        console.error("Error al conectar con el backend:", error);
+        setErrorApi(true);
       } finally {
         setCargando(false);
       }
     };
-    cargarDatosReales();
-    
 
+    cargarDatosReales();
   }, []);
 
   const handleCerrarSesion = () => {
     navigate('/login'); 
   };
+
+  // Soporta estructura plana o anidada en 'metricas' desde Spring Boot
+  const metricas = dashboardData?.metricas || dashboardData || {};
+  const plantasEnPeligro = dashboardData?.plantasEnPeligro || [];
+  const ultimosPedidos = dashboardData?.ultimosPedidos || [];
 
   return (
     <div className="min-h-screen bg-vivero-cream font-sans flex flex-col md:flex-row">
@@ -86,10 +58,10 @@ export default function DashboardAdmin() {
           </Link>
           <Link to="/pedidos" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
             <ShoppingBag className="w-5 h-5 mr-3" /> Pedidos
-            </Link>
-            <Link to="/clientes" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
-                <Users className="w-5 h-5 mr-3" /> Clientes
-            </Link>
+          </Link>
+          <Link to="/clientes" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
+            <Users className="w-5 h-5 mr-3" /> Clientes
+          </Link>
         </div>
 
         <div className="p-4 border-t border-gray-100">
@@ -114,14 +86,22 @@ export default function DashboardAdmin() {
             </Link>
           </div>
 
-          {cargando || !dashboardData ? (
+          {cargando ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-12 h-12 border-4 border-vivero-green border-t-transparent rounded-full animate-spin mb-4"></div>
               <p className="text-vivero-dark/50 font-medium">Conectando con la base de datos...</p>
             </div>
+          ) : errorApi || !dashboardData ? (
+            <div className="bg-white rounded-3xl p-8 text-center text-red-500 shadow-sm border border-red-100">
+              <AlertTriangle className="w-10 h-10 mx-auto mb-2 text-red-400" />
+              <p className="font-bold">No se pudieron cargar las métricas desde la API.</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Verifica la respuesta del endpoint <code>/api/dashboard/resume</code>.
+              </p>
+            </div>
           ) : (
             <>
-              {/* TARJETAS DE MÉTRICAS (KPIs) - LEYENDO DEL JSON ESTRUCTURADO */}
+              {/* TARJETAS DE MÉTRICAS (KPIs) */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-center transform hover:-translate-y-1 transition-transform">
@@ -130,8 +110,12 @@ export default function DashboardAdmin() {
                     <span className="bg-gray-100 text-vivero-dark/60 text-xs font-bold px-2 py-1 rounded-lg">Este Mes</span>
                   </div>
                   <h4 className="text-sm font-bold text-vivero-dark/60 mb-1">Ingresos por Ventas</h4>
-                  <p className="text-3xl font-bold text-vivero-dark">Q{dashboardData.metricas.ventasDelMes.toLocaleString('es-GT', {minimumFractionDigits: 2})}</p>
-                  <p className="text-sm text-green-600 font-medium mt-2">+{dashboardData.metricas.ordenesDelMes} pedidos completados</p>
+                  <p className="text-3xl font-bold text-vivero-dark">
+                    Q{(metricas.ventasDelMes ?? 0).toLocaleString('es-GT', { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-sm text-green-600 font-medium mt-2">
+                    +{metricas.ordenesDelMes ?? 0} pedidos completados
+                  </p>
                 </div>
 
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-center transform hover:-translate-y-1 transition-transform">
@@ -140,7 +124,9 @@ export default function DashboardAdmin() {
                     <span className="bg-gray-100 text-vivero-dark/60 text-xs font-bold px-2 py-1 rounded-lg">Capital</span>
                   </div>
                   <h4 className="text-sm font-bold text-vivero-dark/60 mb-1">Valor en Inventario</h4>
-                  <p className="text-3xl font-bold text-vivero-dark">Q{dashboardData.metricas.valorInventario.toLocaleString('es-GT', {minimumFractionDigits: 2})}</p>
+                  <p className="text-3xl font-bold text-vivero-dark">
+                    Q{(metricas.valorInventario ?? 0).toLocaleString('es-GT', { minimumFractionDigits: 2 })}
+                  </p>
                 </div>
 
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-center transform hover:-translate-y-1 transition-transform">
@@ -149,7 +135,7 @@ export default function DashboardAdmin() {
                     <span className="bg-gray-100 text-vivero-dark/60 text-xs font-bold px-2 py-1 rounded-lg">Catálogo</span>
                   </div>
                   <h4 className="text-sm font-bold text-vivero-dark/60 mb-1">Productos Activos</h4>
-                  <p className="text-3xl font-bold text-vivero-dark">{dashboardData.metricas.totalPlantasActivas}</p>
+                  <p className="text-3xl font-bold text-vivero-dark">{metricas.totalPlantasActivas ?? 0}</p>
                 </div>
 
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-red-100 flex flex-col justify-center transform hover:-translate-y-1 transition-transform">
@@ -158,15 +144,15 @@ export default function DashboardAdmin() {
                     <span className="bg-red-50 text-red-600 text-xs font-bold px-2 py-1 rounded-lg">Requiere Atención</span>
                   </div>
                   <h4 className="text-sm font-bold text-vivero-dark/60 mb-1">Stock Bajo (≤ 5 unds)</h4>
-                  <p className="text-3xl font-bold text-red-600">{dashboardData.metricas.alertasStockBajo}</p>
+                  <p className="text-3xl font-bold text-red-600">{metricas.alertasStockBajo ?? 0}</p>
                 </div>
 
               </div>
 
-              {/* SECCIÓN DE TABLAS - LEYENDO DEL JSON ESTRUCTURADO */}
+              {/* TABLAS */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 
-                {/* Reporte de Inventario Crítico */}
+                {/* Plantas por Agotarse */}
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                   <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                     <h3 className="font-bold font-serif text-xl text-vivero-dark">Plantas por Agotarse</h3>
@@ -181,7 +167,7 @@ export default function DashboardAdmin() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {dashboardData.plantasEnPeligro.map(planta => (
+                        {plantasEnPeligro.map(planta => (
                           <tr key={planta.id} className="hover:bg-red-50/50 transition-colors">
                             <td className="p-4 flex items-center">
                               <img src={planta.imagenUrl} alt="" className="w-10 h-10 rounded-lg bg-gray-200 object-cover mr-3" />
@@ -195,7 +181,7 @@ export default function DashboardAdmin() {
                   </div>
                 </div>
 
-                {/* Reporte de Últimos Pedidos */}
+                {/* Últimos Pedidos */}
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                   <div className="p-6 border-b border-gray-100">
                     <h3 className="font-bold font-serif text-xl text-vivero-dark">Últimos Pedidos</h3>
@@ -210,14 +196,14 @@ export default function DashboardAdmin() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {dashboardData.ultimosPedidos.map(pedido => (
+                        {ultimosPedidos.map(pedido => (
                           <tr key={pedido.id} className="hover:bg-gray-50 transition-colors">
                             <td className="p-4">
                               <p className="font-medium text-vivero-dark">{pedido.cliente}</p>
                               <p className="text-xs text-vivero-dark/50">Pedido #{pedido.id} • {pedido.fecha}</p>
                             </td>
                             <td className="p-4 text-center font-bold text-vivero-purple">
-                              Q{pedido.total.toFixed(2)}
+                              Q{(pedido.total ?? 0).toFixed(2)}
                             </td>
                             <td className="p-4 text-right">
                               <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
@@ -236,6 +222,7 @@ export default function DashboardAdmin() {
               </div>
             </>
           )}
+
         </div>
       </div>
     </div>
