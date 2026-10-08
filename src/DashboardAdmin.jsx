@@ -81,12 +81,12 @@ export default function DashboardAdmin() {
           <Link to="/admin" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
             <PackagePlus className="w-5 h-5 mr-3" /> Inventario
           </Link>
-          <button className="flex items-center w-full p-3 text-vivero-dark/40 cursor-not-allowed rounded-xl font-medium text-left">
+          <Link to="/pedidos" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
             <ShoppingBag className="w-5 h-5 mr-3" /> Pedidos
-          </button>
-          <button className="flex items-center w-full p-3 text-vivero-dark/40 cursor-not-allowed rounded-xl font-medium text-left">
-            <Users className="w-5 h-5 mr-3" /> Clientes
-          </button>
+            </Link>
+            <Link to="/clientes" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
+                <Users className="w-5 h-5 mr-3" /> Clientes
+            </Link>
         </div>
 
         <div className="p-4 border-t border-gray-100">

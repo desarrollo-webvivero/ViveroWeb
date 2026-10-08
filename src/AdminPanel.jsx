@@ -122,6 +122,12 @@ export default function AdminPanel() {
           <h1 className="text-3xl font-bold font-serif text-vivero-dark flex items-center">
             <PackagePlus className="w-8 h-8 mr-3 text-vivero-green" /> Gestión de Inventario
           </h1>
+          <Link to="/pedidos" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
+          <ShoppingBag className="w-5 h-5 mr-3" /> Pedidos
+          </Link>
+          <Link to="/clientes" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
+           <Users className="w-5 h-5 mr-3" /> Clientes
+            </Link>
         </div>
 
         {/* FORMULARIO */}
