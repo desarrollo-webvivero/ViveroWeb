@@ -17,9 +17,10 @@ import PanelClientes from './PanelClientes';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        <CartProvider>
+          
           <Routes>
             {/* Rutas Públicas */}
             <Route path="/" element={<App />} />
@@ -28,10 +29,11 @@ createRoot(document.getElementById('root')).render(
             <Route path="/exterior" element={<CatalogoExterior />} />
             <Route path="/login" element={<LoginAdmin />} />
             <Route path="/pago-contra-entrega" element={<PagoContraEntrega />} />   
+            
+            {/* Rutas Protegidas (Privadas) */}
             <Route path="/pedidos" element={<RutaProtegida><PanelPedidos /></RutaProtegida>} />
             <Route path="/clientes" element={<RutaProtegida><PanelClientes /></RutaProtegida>} />
-           
-            {/* Ruta Protegida (Privada) */}
+            
             <Route path="/admin" element={
               <RutaProtegida>
                 <AdminPanel />
@@ -39,12 +41,13 @@ createRoot(document.getElementById('root')).render(
             } />
             <Route path="/dashboard" element={
               <RutaProtegida>
-              <DashboardAdmin />
+                <DashboardAdmin />
               </RutaProtegida>
             } />
           </Routes>
-        </BrowserRouter>
-      </CartProvider>
-    </AuthProvider>
+          
+        </CartProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </StrictMode>,
 )
