@@ -19,6 +19,7 @@ export default function LoginAdmin() {
       setError('Contraseña incorrecta. Acceso denegado.');
       setPassword('');
     }
+    window.location.href = '/dashboard';
   };
 
   return (

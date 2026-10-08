@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import ContactSection from './contactSection';
 import './App.css';
 
+
 export default function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [currentView, setCurrentView] = useState('inicio');

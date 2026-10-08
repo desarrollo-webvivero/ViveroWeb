@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Truck, MapPin, Phone, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from './CartContext';
+import emailjs from '@emailjs/browser';
 
 export default function PagoContraEntrega() {
   const { cart, vaciarCarrito } = useCart();
@@ -30,21 +31,42 @@ export default function PagoContraEntrega() {
     e.preventDefault();
     setCargando(true);
 
-    // TODO: Aquí en el futuro conectaremos con Spring Boot para guardar el pedido en Oracle
-    const orden = {
-      cliente: datosEnvio,
-      productos: cart,
-      total: total,
-      metodoPago: 'Contra Entrega'
-    };
-    console.log("Orden lista para guardar:", orden);
+    // 1. Convertimos el carrito en una lista de texto ordenada para el correo
+    let resumenProductos = '';
+    cart.forEach(item => {
+      const precio = obtenerPrecioSeguro(item.precio);
+      resumenProductos += `- ${item.cantidad}x ${item.nombre} (Q${precio.toFixed(2)} c/u)\n`;
+    });
 
-    // Simulamos el tiempo de conexión con el servidor
-    setTimeout(() => {
+    // 2. Preparamos las variables que EmailJS incrustará en tu correo
+    const templateParams = {
+      nombre_cliente: datosEnvio.nombre,
+      telefono: datosEnvio.telefono,
+      direccion_completa: `${datosEnvio.direccion}, ${datosEnvio.municipio}, ${datosEnvio.departamento}. Referencias: ${datosEnvio.referencias || 'Ninguna'}`,
+      resumen_pedido: resumenProductos,
+      total: `Q${total.toFixed(2)}`
+    };
+
+    try {
+      // 3. Enviamos el correo silenciosamente
+      // IMPORTANTE: Deberás reemplazar estos 3 textos con tus credenciales reales
+      await emailjs.send(
+        'TU_SERVICE_ID',    // Ej. 'service_gmail123'
+        'TU_TEMPLATE_ID',   // Ej. 'template_xyz890'
+        templateParams,
+        'TU_PUBLIC_KEY'     // Ej. 'aBcDeFgHiJkLmNo'
+      );
+
+      // 4. Si el correo se envió con éxito, mostramos la pantalla verde
       setCargando(false);
       setPedidoCompletado(true);
       vaciarCarrito();
-    }, 1500);
+      
+    } catch (error) {
+      console.error('Error enviando el correo:', error);
+      alert('Hubo un problema al procesar el pedido. Por favor, revisa tu conexión e intenta de nuevo.');
+      setCargando(false);
+    }
   };
 
   // Pantalla de Éxito
