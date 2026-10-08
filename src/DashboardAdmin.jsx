@@ -10,6 +10,7 @@ export default function DashboardAdmin() {
   const [dashboardData, setDashboardData] = useState(null);
 
   useEffect(() => {
+    /*
     // =========================================================================
     // 🚧 MOCK PARA EL COMPAÑERO DE BACKEND (ELIMINAR CUANDO LA API ESTÉ LISTA)
     // =========================================================================
@@ -37,11 +38,13 @@ export default function DashboardAdmin() {
       setDashboardData(datosSimulados);
       setCargando(false);
     }, 1000);
-
+*/
     /* 
     =========================================================================
     🔌 CÓDIGO REAL A DESCOMENTAR CUANDO SPRING BOOT ESTÉ LISTO
     =========================================================================
+    */
+    
     const cargarDatosReales = async () => {
       try {
         const respuesta = await fetch('https://vivero-backend-2.onrender.com/api/dashboard/resumen');
@@ -54,7 +57,7 @@ export default function DashboardAdmin() {
       }
     };
     cargarDatosReales();
-    */
+    
 
   }, []);
 
