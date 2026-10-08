@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { PackagePlus, Save, ArrowLeft, Edit, Trash2, X, UploadCloud } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+// AQUÍ ESTABA EL ERROR: Agregué los íconos faltantes (ShoppingBag, Users, LayoutDashboard, LogOut)
+import { PackagePlus, Save, Edit, Trash2, X, UploadCloud, ShoppingBag, Users, LayoutDashboard, LogOut } from 'lucide-react';
 import { apiService } from './services/api';
 
 export default function AdminPanel() {
+  const navigate = useNavigate();
   const [producto, setProducto] = useState({
-    nombre: '',
-    precio: '',
-    stock: '',
-    categoria: '',
-    descripcion: '',
-    imagenArchivo: null,
-    imagenPreview: ''
+    nombre: '', precio: '', stock: '', categoria: '', descripcion: '', imagenArchivo: null, imagenPreview: ''
   });
   
   const [listaProductos, setListaProductos] = useState([]);
@@ -38,7 +34,7 @@ export default function AdminPanel() {
       setProducto({
         ...producto,
         imagenArchivo: file,
-        imagenPreview: URL.createObjectURL(file) // Crea una URL temporal para la vista previa
+        imagenPreview: URL.createObjectURL(file) 
       });
     }
   };
@@ -47,7 +43,6 @@ export default function AdminPanel() {
     e.preventDefault();
     setCargando(true);
 
-    // Al enviar archivos, el estándar es usar FormData en lugar de un JSON normal
     const formData = new FormData();
     formData.append('nombre', producto.nombre);
     formData.append('precioBase', producto.precio);
@@ -56,7 +51,7 @@ export default function AdminPanel() {
     formData.append('categoria.id', producto.categoria);
     
     if (producto.imagenArchivo) {
-      formData.append('imagen', producto.imagenArchivo); // El archivo real
+      formData.append('imagen', producto.imagenArchivo); 
     }
 
     try {
@@ -89,7 +84,7 @@ export default function AdminPanel() {
       categoria: item.categoria?.id?.toString() || '1',
       descripcion: item.descripcion,
       imagenArchivo: null,
-      imagenPreview: item.imagenUrl || '' // Muestra la imagen que ya tiene guardada
+      imagenPreview: item.imagenUrl || '' 
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -112,148 +107,174 @@ export default function AdminPanel() {
     }
   };
 
+  const handleCerrarSesion = () => navigate('/login');
+
   return (
-    <div className="min-h-screen bg-vivero-cream p-4 sm:p-8 font-sans">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <Link to="/" className="flex items-center text-vivero-dark hover:text-vivero-purple font-medium transition-colors">
-            <ArrowLeft className="w-5 h-5 mr-2" /> Volver a la tienda
-          </Link>
-          <h1 className="text-3xl font-bold font-serif text-vivero-dark flex items-center">
-            <PackagePlus className="w-8 h-8 mr-3 text-vivero-green" /> Gestión de Inventario
-          </h1>
-          <Link to="/pedidos" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
-          <ShoppingBag className="w-5 h-5 mr-3" /> Pedidos
-          </Link>
-          <Link to="/clientes" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 hover:text-vivero-dark rounded-xl font-medium transition-colors">
-           <Users className="w-5 h-5 mr-3" /> Clientes
-            </Link>
+    <div className="min-h-screen bg-vivero-cream font-sans flex flex-col md:flex-row">
+      
+      {/* MENÚ LATERAL (SIDEBAR) */}
+      <div className="w-full md:w-64 bg-white shadow-xl border-r border-vivero-green/20 flex flex-col z-10">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between md:justify-start">
+          <h2 className="text-2xl font-bold font-serif text-vivero-dark flex items-center">
+            <LayoutDashboard className="w-6 h-6 mr-2 text-vivero-green" /> ViveroWeb
+          </h2>
         </div>
+        <div className="flex-1 p-4 space-y-2">
+          <Link to="/dashboard" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+            <LayoutDashboard className="w-5 h-5 mr-3" /> Panel General
+          </Link>
+          <Link to="/admin" className="flex items-center w-full p-3 bg-vivero-green/10 text-vivero-green rounded-xl font-bold transition-colors">
+            <PackagePlus className="w-5 h-5 mr-3" /> Inventario
+          </Link>
+          <Link to="/pedidos" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+            <ShoppingBag className="w-5 h-5 mr-3" /> Pedidos
+          </Link>
+          <Link to="/clientes" className="flex items-center w-full p-3 text-vivero-dark/70 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+            <Users className="w-5 h-5 mr-3" /> Clientes
+          </Link>
+        </div>
+        <div className="p-4 border-t border-gray-100">
+          <button onClick={handleCerrarSesion} className="flex items-center w-full p-3 text-red-500 hover:bg-red-50 rounded-xl font-medium transition-colors">
+            <LogOut className="w-5 h-5 mr-3" /> Cerrar Sesión
+          </button>
+        </div>
+      </div>
 
-        {/* FORMULARIO */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 border border-vivero-green/20 mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-vivero-dark font-serif">
-              {editandoId ? 'Editando Producto' : 'Agregar Nuevo Producto'}
-            </h2>
-            {editandoId && (
-              <button onClick={cancelarEdicion} className="text-red-500 hover:bg-red-50 px-3 py-1 rounded-lg flex items-center font-medium transition-colors">
-                <X className="w-4 h-4 mr-1" /> Cancelar edición
-              </button>
-            )}
-          </div>
+      {/* CONTENIDO PRINCIPAL */}
+      <div className="flex-1 p-6 md:p-10 overflow-y-auto">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-3xl font-bold font-serif text-vivero-dark mb-2">
+            Gestión de Inventario
+          </h1>
+          <p className="text-vivero-dark/60 mb-8">Agrega, edita o elimina plantas de tu catálogo.</p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-vivero-dark mb-2">Nombre de la Planta</label>
-                <input type="text" required value={producto.nombre} onChange={(e) => setProducto({ ...producto, nombre: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none" placeholder="Ej. Ficus Lyrata" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-vivero-dark mb-2">Precio de Venta (Q)</label>
-                <input type="number" step="0.01" required value={producto.precio} onChange={(e) => setProducto({ ...producto, precio: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none" placeholder="Ej. 150.00" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-vivero-dark mb-2"># Unidades Iniciales</label>
-                <input type="number" required value={producto.stock} onChange={(e) => setProducto({ ...producto, stock: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none" placeholder="Ej. 10" />
-              </div>
+          {/* FORMULARIO */}
+          <div className="bg-white rounded-3xl shadow-xl p-8 border border-vivero-green/20 mb-8 relative">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+              <h2 className="text-xl font-bold font-serif text-vivero-dark flex items-center">
+                <PackagePlus className="w-6 h-6 mr-2 text-vivero-green" />
+                {editandoId ? 'Editando Producto' : 'Agregar Nuevo Producto'}
+              </h2>
+              {editandoId && (
+                <button onClick={cancelarEdicion} className="text-red-500 hover:bg-red-50 px-3 py-1 rounded-lg flex items-center font-medium transition-colors">
+                  <X className="w-4 h-4 mr-1" /> Cancelar edición
+                </button>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-vivero-dark mb-2">Categoría</label>
-                <select value={producto.categoria} onChange={(e) => setProducto({ ...producto, categoria: e.target.value })} className="w-full p-3 border border-vivero-green/20 rounded-xl">
-                  <option value="1">Plantas de Interior</option>
-                  <option value="2">Árboles Frutales</option>
-                  <option value="3">Jardinería Exterior</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-vivero-dark mb-2 flex items-center">
-                  <UploadCloud className="w-4 h-4 mr-2 text-vivero-dark/50" /> Subir Fotografía
-                </label>
-                <div className="flex items-center space-x-4">
-                  <input 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handleImagenChange}
-                    className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-vivero-green/10 file:text-vivero-green hover:file:bg-vivero-green/20 transition-colors" 
-                  />
-                  {producto.imagenPreview && (
-                    <img src={producto.imagenPreview} alt="Vista previa" className="h-12 w-12 object-cover rounded-lg shadow-sm border border-gray-200" />
-                  )}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-vivero-dark mb-2">Nombre de la Planta</label>
+                  <input type="text" required value={producto.nombre} onChange={(e) => setProducto({ ...producto, nombre: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none" placeholder="Ej. Ficus Lyrata" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-vivero-dark mb-2">Precio de Venta (Q)</label>
+                  <input type="number" step="0.01" required value={producto.precio} onChange={(e) => setProducto({ ...producto, precio: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none" placeholder="Ej. 150.00" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-vivero-dark mb-2"># Unidades Iniciales</label>
+                  <input type="number" required value={producto.stock} onChange={(e) => setProducto({ ...producto, stock: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none" placeholder="Ej. 10" />
                 </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-bold text-vivero-dark mb-2">Descripción Breve</label>
-              <textarea required value={producto.descripcion} onChange={(e) => setProducto({ ...producto, descripcion: e.target.value })} rows="3" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none resize-none" placeholder="Características principales para el cliente..."></textarea>
-            </div>
-
-            <button type="submit" disabled={cargando} className={`w-full text-white font-bold py-4 rounded-xl transition-colors flex justify-center items-center shadow-lg disabled:opacity-70 ${editandoId ? 'bg-vivero-purple hover:bg-opacity-90' : 'bg-vivero-dark hover:bg-vivero-green'}`}>
-              <Save className="w-5 h-5 mr-2" /> {cargando ? 'Procesando...' : (editandoId ? 'Guardar Cambios' : 'Registrar Nuevo Producto')}
-            </button>
-
-            {mensaje && (
-              <div className={`mt-4 p-4 font-medium rounded-xl text-center transition-all ${mensaje.includes('Error') ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-vivero-green border border-green-200'}`}>
-                {mensaje}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-vivero-dark mb-2">Categoría</label>
+                  <select value={producto.categoria} onChange={(e) => setProducto({ ...producto, categoria: e.target.value })} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none">
+                    <option value="1">Plantas de Interior</option>
+                    <option value="2">Árboles Frutales</option>
+                    <option value="3">Jardinería Exterior</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-vivero-dark mb-2 flex items-center">
+                    <UploadCloud className="w-4 h-4 mr-2 text-vivero-dark/50" /> Subir Fotografía
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handleImagenChange}
+                      className="w-full p-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-vivero-green/10 file:text-vivero-green hover:file:bg-vivero-green/20 transition-colors" 
+                    />
+                    {producto.imagenPreview && (
+                      <img src={producto.imagenPreview} alt="Vista previa" className="h-12 w-12 object-cover rounded-lg shadow-sm border border-gray-200" />
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
-          </form>
-        </div>
 
-        {/* LISTADO DE INVENTARIO */}
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-vivero-green/20">
-          <div className="p-6 bg-vivero-green/5 border-b border-vivero-green/10">
-            <h2 className="text-xl font-bold text-vivero-dark font-serif">Inventario Actual</h2>
+              <div>
+                <label className="block text-sm font-bold text-vivero-dark mb-2">Descripción Breve</label>
+                <textarea required value={producto.descripcion} onChange={(e) => setProducto({ ...producto, descripcion: e.target.value })} rows="3" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none resize-none" placeholder="Características principales para el cliente..."></textarea>
+              </div>
+
+              <button type="submit" disabled={cargando} className={`w-full text-white font-bold py-4 rounded-xl transition-colors flex justify-center items-center shadow-lg disabled:opacity-70 ${editandoId ? 'bg-vivero-purple hover:bg-opacity-90' : 'bg-vivero-dark hover:bg-vivero-green'}`}>
+                <Save className="w-5 h-5 mr-2" /> {cargando ? 'Procesando...' : (editandoId ? 'Guardar Cambios' : 'Registrar Nuevo Producto')}
+              </button>
+
+              {mensaje && (
+                <div className={`mt-4 p-4 font-medium rounded-xl text-center transition-all ${mensaje.includes('Error') ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-vivero-green border border-green-200'}`}>
+                  {mensaje}
+                </div>
+              )}
+            </form>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 text-vivero-dark/70 text-sm">
-                  <th className="p-4 font-bold">Producto</th>
-                  <th className="p-4 font-bold">Categoría</th>
-                  <th className="p-4 font-bold">Precio</th>
-                  <th className="p-4 font-bold">Stock</th>
-                  <th className="p-4 font-bold text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {listaProductos.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="p-8 text-center text-vivero-dark/50">
-                      No hay productos registrados en la base de datos.
-                    </td>
+
+          {/* LISTADO DE INVENTARIO */}
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-vivero-green/20">
+            <div className="p-6 bg-gray-50 border-b border-gray-100">
+              <h2 className="text-xl font-bold text-vivero-dark font-serif">Inventario Actual</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 text-vivero-dark/70 text-xs uppercase tracking-wider">
+                    <th className="p-4 font-bold">Producto</th>
+                    <th className="p-4 font-bold">Categoría</th>
+                    <th className="p-4 font-bold text-center">Precio</th>
+                    <th className="p-4 font-bold text-center">Stock</th>
+                    <th className="p-4 font-bold text-right">Acciones</th>
                   </tr>
-                ) : (
-                  listaProductos.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="p-4">
-                        <div className="flex items-center">
-                          <img src={item.imagenUrl || item.imagenPreview} alt={item.nombre} className="w-10 h-10 rounded-lg object-cover mr-3 bg-gray-200" />
-                          <span className="font-bold text-vivero-dark">{item.nombre}</span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-vivero-dark/80 text-sm">
-                        {item.categoria?.nombre || 'Sin categoría'}
-                      </td>
-                      <td className="p-4 font-medium text-vivero-purple">Q{item.precioBase || item.precio}</td>
-                      <td className="p-4 text-vivero-dark/80">{item.stockDisponible} unds</td>
-                      <td className="p-4 text-right">
-                        <button onClick={() => iniciarEdicion(item)} className="p-2 text-vivero-dark/50 hover:text-vivero-purple hover:bg-purple-50 rounded-lg transition-colors mr-2" title="Editar">
-                          <Edit className="w-5 h-5" />
-                        </button>
-                        <button onClick={() => borrarProducto(item.id)} className="p-2 text-vivero-dark/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {listaProductos.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="p-8 text-center text-vivero-dark/50">
+                        No hay productos registrados en la base de datos.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    listaProductos.map((item) => (
+                      <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="p-4">
+                          <div className="flex items-center">
+                            <img src={item.imagenUrl || item.imagenPreview} alt={item.nombre} className="w-10 h-10 rounded-lg object-cover mr-3 bg-gray-200" />
+                            <span className="font-bold text-vivero-dark">{item.nombre}</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-vivero-dark/80 text-sm">
+                          {item.categoria?.nombre || 'Sin categoría'}
+                        </td>
+                        <td className="p-4 text-center font-medium text-vivero-purple">Q{item.precioBase || item.precio}</td>
+                        <td className="p-4 text-center text-vivero-dark/80 font-bold">{item.stockDisponible}</td>
+                        <td className="p-4 text-right">
+                          <button onClick={() => iniciarEdicion(item)} className="p-2 text-vivero-dark/50 hover:text-vivero-purple hover:bg-purple-50 rounded-lg transition-colors mr-2" title="Editar">
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <button onClick={() => borrarProducto(item.id)} className="p-2 text-vivero-dark/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+
         </div>
       </div>
     </div>
