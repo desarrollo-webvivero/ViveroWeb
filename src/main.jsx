@@ -26,11 +26,16 @@ createRoot(document.getElementById('root')).render(
             <Route path="/exterior" element={<CatalogoExterior />} />
             <Route path="/login" element={<LoginAdmin />} />
             <Route path="/pago-contra-entrega" element={<PagoContraEntrega />} />   
-            <Route path="/dashboard" element={<DashboardAdmin />} />
+           
             {/* Ruta Protegida (Privada) */}
             <Route path="/admin" element={
               <RutaProtegida>
                 <AdminPanel />
+              </RutaProtegida>
+            } />
+            <Route path="/dashboard" element={
+              <RutaProtegida>
+              <DashboardAdmin />
               </RutaProtegida>
             } />
           </Routes>
