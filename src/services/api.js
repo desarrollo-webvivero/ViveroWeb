@@ -15,6 +15,23 @@ export async function loginCliente(credenciales) {
   return response.json();
 }
 
+// Registro de un cliente nuevo
+export async function registrarCliente(datos) {
+  const response = await fetch(`${BASE_URL}/api/clientes/registro`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos),
+  });
+
+  if (!response.ok) {
+    if (response.status === 409) {
+      throw new Error('Ya existe una cuenta con ese correo.');
+    }
+    throw new Error('No se pudo crear la cuenta. Intenta de nuevo.');
+  }
+  return response.json().catch(() => ({}));
+}
+
 // Registro de productos (soporta FormData con imagen)
 export async function registrarProducto(formData) {
   const response = await fetch(`${BASE_URL}/api/productos`, {
@@ -78,5 +95,6 @@ export const apiService = {
   actualizarProducto: actualizarProducto,
   eliminarProducto: eliminarProducto,
   login: loginCliente,
+  registrarCliente: registrarCliente,  
   verificarStock: verificarStock
 };

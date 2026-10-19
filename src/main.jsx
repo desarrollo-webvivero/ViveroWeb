@@ -8,6 +8,8 @@ import CatalogoExterior from './CatalogoExterior.jsx'
 import AdminPanel from './AdminPanel.jsx'
 import LoginAdmin from './LoginAdmin.jsx'
 import { CartProvider } from './CartContext.jsx'
+import { ClienteProvider } from './ClienteContext.jsx'
+import AuthModal from './AuthModal.jsx'
 import { AuthProvider, RutaProtegida } from './AuthContext.jsx'
 import './index.css'
 import PagoContraEntrega from './PagoContraEntrega';
@@ -19,34 +21,38 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider>
-          
-          <Routes>
-            {/* Rutas Públicas */}
-            <Route path="/" element={<App />} />
-            <Route path="/interior" element={<CatalogoInterior />} />
-            <Route path="/frutales" element={<CatalogoFrutales />} />
-            <Route path="/exterior" element={<CatalogoExterior />} />
-            <Route path="/login" element={<LoginAdmin />} />
-            <Route path="/pago-contra-entrega" element={<PagoContraEntrega />} />   
-            
-            {/* Rutas Protegidas (Privadas) */}
-            <Route path="/pedidos" element={<RutaProtegida><PanelPedidos /></RutaProtegida>} />
-            <Route path="/clientes" element={<RutaProtegida><PanelClientes /></RutaProtegida>} />
-            
-            <Route path="/admin" element={
-              <RutaProtegida>
-                <AdminPanel />
-              </RutaProtegida>
-            } />
-            <Route path="/dashboard" element={
-              <RutaProtegida>
-                <DashboardAdmin />
-              </RutaProtegida>
-            } />
-          </Routes>
-          
-        </CartProvider>
+        <ClienteProvider>
+          <CartProvider>
+
+            <Routes>
+              {/* Rutas Públicas */}
+              <Route path="/" element={<App />} />
+              <Route path="/interior" element={<CatalogoInterior />} />
+              <Route path="/frutales" element={<CatalogoFrutales />} />
+              <Route path="/exterior" element={<CatalogoExterior />} />
+              <Route path="/login" element={<LoginAdmin />} />
+              <Route path="/pago-contra-entrega" element={<PagoContraEntrega />} />
+
+              {/* Rutas Protegidas (Privadas) */}
+              <Route path="/pedidos" element={<RutaProtegida><PanelPedidos /></RutaProtegida>} />
+              <Route path="/clientes" element={<RutaProtegida><PanelClientes /></RutaProtegida>} />
+
+              <Route path="/admin" element={
+                <RutaProtegida>
+                  <AdminPanel />
+                </RutaProtegida>
+              } />
+              <Route path="/dashboard" element={
+                <RutaProtegida>
+                  <DashboardAdmin />
+                </RutaProtegida>
+              } />
+            </Routes>
+
+            <AuthModal />
+
+          </CartProvider>
+        </ClienteProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Menu, X, ArrowRight, Truck, Leaf, ShieldCheck, MapPin, Phone, MessageCircle, Globe, Mail, BookOpen, Package, Palette, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ContactSection from './contactSection';
+import UserMenuButton from './UserMenuButton';
 import './App.css';
 
 
@@ -80,6 +81,7 @@ export default function App() {
                   <a href="#servicios" onClick={(e) => irAInicio(e, 'servicios')} className="text-vivero-dark hover:text-vivero-purple transition-colors">Servicios</a>
                   <a href="#nosotros" onClick={(e) => irAInicio(e, 'nosotros')} className="text-vivero-dark hover:text-vivero-purple transition-colors">Nosotros</a>
                   <a href="#contacto" onClick={irAContacto} className="text-vivero-dark hover:text-vivero-purple transition-colors">Contacto</a>
+                  <UserMenuButton variant="desktop" />
                 </nav>
 
                 <div className="hidden md:flex">
@@ -121,6 +123,7 @@ export default function App() {
               <a href="#servicios" onClick={(e) => irAInicio(e, 'servicios')} className="px-4 py-3 rounded-lg text-base font-medium text-vivero-dark hover:bg-vivero-green hover:text-vivero-cream transition-colors">Servicios</a>
               <a href="#nosotros" onClick={(e) => irAInicio(e, 'nosotros')} className="px-4 py-3 rounded-lg text-base font-medium text-vivero-dark hover:bg-vivero-green hover:text-vivero-cream transition-colors">Nosotros</a>
               <a href="#contacto" onClick={irAContacto} className="px-4 py-3 rounded-lg text-base font-medium text-vivero-dark hover:bg-vivero-green hover:text-vivero-cream transition-colors">Contacto</a>
+              <UserMenuButton variant="mobile" onAction={() => setIsOpen(false)} />
             </div>
           </div>
         )}
