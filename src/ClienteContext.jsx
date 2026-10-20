@@ -2,6 +2,8 @@ import React, { createContext, useCallback, useContext, useState } from 'react';
 import {
   loginCliente as apiLoginCliente,
   registrarCliente as apiRegistrarCliente,
+  verificarCuenta as apiVerificarCuenta,
+  reenviarCodigo as apiReenviarCodigo,
 } from './services/api';
 
 const ClienteContext = createContext(null);
@@ -23,6 +25,15 @@ const leerSesionGuardada = () => {
   }
 };
 
+// Convierte lo que responde el backend al formato que usa la página.
+// El login responde: { mensaje, clienteId, nombreCompleto, correoElectronico }
+const normalizarCliente = (d = {}) => ({
+  id: d.clienteId ?? d.id ?? d.idCliente,
+  nombre: d.nombreCompleto ?? d.nombre,
+  correo: d.correoElectronico ?? d.correo,
+  telefono: d.telefono,
+});
+
 export const ClienteProvider = ({ children }) => {
   // Sesión del CLIENTE (la del administrador sigue en AuthContext)
   const [cliente, setCliente] = useState(leerSesionGuardada);
@@ -37,10 +48,10 @@ export const ClienteProvider = ({ children }) => {
   const cerrarAuth = useCallback(() => setAuthAbierto(false), []);
 
   const guardarSesion = (data) => {
-    // Nunca guardamos la contraseña; solo lo que devuelva el backend
-    const datos = data?.cliente ?? data;
-    setCliente(datos);
-    localStorage.setItem(CLAVE_STORAGE, JSON.stringify(datos));
+    // Nunca guardamos la contraseña; solo los datos que devuelve el backend
+    const sesion = normalizarCliente(data);
+    setCliente(sesion);
+    localStorage.setItem(CLAVE_STORAGE, JSON.stringify(sesion));
   };
 
   const iniciarSesion = async ({ correo, password }) => {
@@ -48,11 +59,13 @@ export const ClienteProvider = ({ children }) => {
     guardarSesion(data);
   };
 
-  const registrar = async ({ nombre, correo, telefono, password }) => {
-    await apiRegistrarCliente({ nombre, correo, telefono, password });
-    // Tras registrarse, iniciamos sesión automáticamente
-    await iniciarSesion({ correo, password });
-  };
+  // Crea la cuenta y el backend envía el código. NO inicia sesión todavía:
+  // primero hay que verificar el código.
+  const registrar = (datos) => apiRegistrarCliente(datos);
+
+  const verificar = (datos) => apiVerificarCuenta(datos);
+
+  const reenviar = (datos) => apiReenviarCodigo(datos);
 
   const cerrarSesion = () => {
     setCliente(null);
@@ -70,6 +83,8 @@ export const ClienteProvider = ({ children }) => {
         cerrarAuth,
         iniciarSesion,
         registrar,
+        verificar,
+        reenviar,
         cerrarSesion,
       }}
     >
