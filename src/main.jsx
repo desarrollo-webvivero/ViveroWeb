@@ -16,6 +16,7 @@ import PagoContraEntrega from './PagoContraEntrega';
 import DashboardAdmin from './DashboardAdmin';
 import PanelPedidos from './PanelPedidos';
 import PanelClientes from './PanelClientes';
+import MiCuenta from './MiCuenta.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -32,7 +33,8 @@ createRoot(document.getElementById('root')).render(
               <Route path="/exterior" element={<CatalogoExterior />} />
               <Route path="/login" element={<LoginAdmin />} />
               <Route path="/pago-contra-entrega" element={<PagoContraEntrega />} />
-
+              <Route path="/mi-cuenta" element={<MiCuenta />} />
+              
               {/* Rutas Protegidas (Privadas) */}
               <Route path="/pedidos" element={<RutaProtegida><PanelPedidos /></RutaProtegida>} />
               <Route path="/clientes" element={<RutaProtegida><PanelClientes /></RutaProtegida>} />

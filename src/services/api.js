@@ -18,7 +18,7 @@ export class ErrorApi extends Error {
 }
 
 // Envía un POST con JSON. Devuelve la respuesta del backend, o lanza ErrorApi
-// con el "mensaje" que mande el backend (ya viene en español).
+// con el "mensaje" que mande el backend.
 async function postJson(ruta, cuerpo) {
   let response;
   try {
@@ -78,6 +78,31 @@ export function loginCliente({ correo, password }) {
     contrasena: password,
   });
 }
+
+
+// Pedidos de UN cliente. Devuelve una lista (vacía si no tiene pedidos).
+//  crear: GET /api/pedidos/cliente/{id}
+export async function obtenerPedidosCliente(clienteId) {
+  let response;
+  try {
+    response = await fetch(`${BASE_URL}/api/pedidos/cliente/${clienteId}`);
+  } catch {
+    throw new Error('No pudimos conectar con el servidor. Intenta de nuevo en un momento.');
+  }
+  if (!response.ok) {
+    const error = new Error(
+      response.status === 404
+        ? 'Esta sección todavía no está disponible. Intenta más tarde.'
+        : 'No pudimos cargar tus pedidos. Intenta de nuevo.'
+    );
+    error.status = response.status;
+    throw error;
+  }
+  const datos = await response.json().catch(() => []);
+  return Array.isArray(datos) ? datos : datos.pedidos ?? [];
+}
+
+
 // Registro de productos (soporta FormData con imagen)
 export async function registrarProducto(formData) {
   const response = await fetch(`${BASE_URL}/api/productos`, {

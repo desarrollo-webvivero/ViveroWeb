@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Mail, Lock, User, Phone, Eye, EyeOff, Leaf, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { useCliente } from './ClienteContext';
+import { useNavigate } from 'react-router-dom';
 
 const formVacio = {
   nombre: '',
@@ -12,7 +13,7 @@ const formVacio = {
   codigo: '',
 };
 
-const ESPERA_REENVIO = 30; // segundos antes de poder pedir otro código
+const ESPERA_REENVIO = 60; // segundos antes de poder pedir otro código
 
 // Misma regla que el backend: mínimo 8 caracteres, con letras y números
 const contrasenaValida = (p) => p.length >= 8 && /\p{L}/u.test(p) && /\d/.test(p);
@@ -69,7 +70,8 @@ export default function AuthModal() {
 
 function AuthModalContenido() {
   const { vistaInicial, cerrarAuth, iniciarSesion, registrar, verificar, reenviar } = useCliente();
-
+  
+  const navigate = useNavigate();  
   const [vista, setVista] = useState(vistaInicial); // 'login' | 'registro' | 'verificacion'
   const [form, setForm] = useState(formVacio);
   const [verPassword, setVerPassword] = useState(false);
@@ -140,6 +142,7 @@ function AuthModalContenido() {
       if (esLogin) {
         await iniciarSesion({ correo, password: form.password });
         cerrarAuth();
+        navigate('/mi-cuenta'); // Redirigir a la página de "Mi cuenta" después de iniciar sesión
       } else if (esRegistro) {
         const datos = await registrar({
           nombre: form.nombre.trim(),
@@ -160,6 +163,7 @@ function AuthModalContenido() {
         await verificar({ correo, codigo: form.codigo });
         await iniciarSesion({ correo, password: form.password });
         cerrarAuth();
+        navigate('/mi-cuenta'); // Redirigir a la página de "Mi cuenta" después de verificar y entrar
       }
     } catch (err) {
       if (esLogin && err.requiereVerificacion) {
