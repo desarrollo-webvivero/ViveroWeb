@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useCliente } from './ClienteContext';
 import { obtenerPedidosCliente } from './services/api';
+import Footer from './Footer';
 
 const WHATSAPP = '50244508589'; // +502 4450-8589
 
@@ -192,31 +193,36 @@ export default function MiCuenta() {
   );
 
   return (
-    <div className="min-h-screen bg-vivero-cream p-4 sm:p-8 font-sans">
-      <div className="max-w-4xl mx-auto">
-        <Link
-          to="/"
-          className="flex items-center text-vivero-dark hover:text-vivero-purple font-medium transition-colors mb-8 w-fit"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" /> Volver a la tienda
-        </Link>
-
-        {/* Bienvenida */}
-        <div className="bg-vivero-dark text-white rounded-3xl p-8 mb-6 shadow-xl flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-vivero-yellow font-bold text-sm uppercase tracking-wider mb-1">Mi cuenta</p>
-            <h1 className="text-3xl font-bold font-serif">¡Hola, {primerNombre}!</h1>
-            <p className="text-white/70 mt-1">Qué gusto tenerte en Vivero El Pensamiento.</p>
-          </div>
-          <button
-            type="button"
-            onClick={salir}
-            className="inline-flex items-center px-4 py-2 rounded-xl border border-white/30 text-white/90 hover:bg-white/10 transition-colors text-sm font-semibold"
+    <div className="min-h-screen bg-vivero-cream font-sans flex flex-col">
+      {/* Banner de bienvenida  */}
+      <section className="relative bg-vivero-dark text-white overflow-hidden">
+        <Leaf className="absolute -right-10 -bottom-16 w-72 h-72 text-white/5 rotate-12 pointer-events-none" aria-hidden="true" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-8 pt-6 pb-16">
+          <Link
+            to="/"
+            className="flex items-center text-white/80 hover:text-vivero-yellow font-medium transition-colors mb-5 w-fit"
           >
-            <LogOut className="w-4 h-4 mr-2" /> Cerrar sesión
-          </button>
-        </div>
+            <ArrowLeft className="w-5 h-5 mr-2" /> Volver a la tienda
+          </Link>
 
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-vivero-yellow font-bold text-sm uppercase tracking-wider mb-1">Mi cuenta</p>
+              <h1 className="text-3xl sm:text-4xl font-bold font-serif">¡Hola, {primerNombre}!</h1>
+              <p className="text-white/70 mt-1">Qué gusto tenerte en Vivero El Pensamiento.</p>
+            </div>
+            <button
+              type="button"
+              onClick={salir}
+              className="inline-flex items-center px-4 py-2 rounded-xl border border-white/30 text-white/90 hover:bg-white/10 transition-colors text-sm font-semibold"
+            >
+              <LogOut className="w-4 h-4 mr-2" /> Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-8 -mt-8 pb-16 relative">
         {/* Pestañas */}
         <div className="grid grid-cols-3 bg-white rounded-2xl p-1 mb-6 shadow-sm border border-gray-100">
           {pestanas.map(({ id, texto, icono: Icono }) => (
@@ -325,7 +331,9 @@ export default function MiCuenta() {
             </div>
           )}
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }
