@@ -69,8 +69,7 @@ export default function AuthModal() {
 }
 
 function AuthModalContenido() {
-  const { vistaInicial, cerrarAuth, iniciarSesion, registrar, verificar, reenviar } = useCliente();
-  
+  const { vistaInicial, destinoAuth, mensajeAuth, cerrarAuth, iniciarSesion, registrar, verificar, reenviar } = useCliente();  
   const navigate = useNavigate();  
   const [vista, setVista] = useState(vistaInicial); // 'login' | 'registro' | 'verificacion'
   const [form, setForm] = useState(formVacio);
@@ -142,7 +141,7 @@ function AuthModalContenido() {
       if (esLogin) {
         await iniciarSesion({ correo, password: form.password });
         cerrarAuth();
-        navigate('/mi-cuenta'); // Redirigir a la página de "Mi cuenta" después de iniciar sesión
+        navigate(destinoAuth || '/mi-cuenta'); // Vuelve a donde estaba (ej. el pago) o va a "Mi cuenta"
       } else if (esRegistro) {
         const datos = await registrar({
           nombre: form.nombre.trim(),
@@ -163,7 +162,7 @@ function AuthModalContenido() {
         await verificar({ correo, codigo: form.codigo });
         await iniciarSesion({ correo, password: form.password });
         cerrarAuth();
-        navigate('/mi-cuenta'); // Redirigir a la página de "Mi cuenta" después de verificar y entrar
+        navigate(destinoAuth || '/mi-cuenta'); // Vuelve a donde estaba (ej. el pago) o va a "Mi cuenta"
       }
     } catch (err) {
       if (esLogin && err.requiereVerificacion) {
@@ -244,6 +243,13 @@ function AuthModalContenido() {
           </h2>
           <p className="text-vivero-dark/60 text-sm mt-1">{subtitulo}</p>
         </div>
+
+        {/* Motivo por el que se pidió iniciar sesión (ej. para continuar con el pago) */}
+        {mensajeAuth && !esVerificacion && (
+          <p className="bg-vivero-yellow/20 text-vivero-dark text-sm font-medium rounded-xl p-3 mb-6 text-center">
+            {mensajeAuth}
+          </p>
+        )}
 
         {/* Pestañas (no se muestran mientras se verifica el código) */}
         {!esVerificacion && (

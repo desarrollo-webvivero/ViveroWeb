@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { X, ShoppingBag, Trash2, ArrowRight, MessageCircle, Truck, CreditCard } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useCliente } from './ClienteContext';
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
@@ -16,6 +17,8 @@ export const CartProvider = ({ children }) => {
   const [mostrarOpcionesPago, setMostrarOpcionesPago] = useState(false);
 
   const location = useLocation();
+  const navigate = useNavigate();
+  const { cliente, abrirAuth } = useCliente();
   // Definimos en qué rutas NO queremos que aparezca el botón flotante
   const rutasAdmin = ['/dashboard', '/admin', '/pedidos', '/clientes', '/login'];
   const esRutaAdmin = rutasAdmin.some(ruta => location.pathname.startsWith(ruta));
@@ -82,8 +85,16 @@ export const CartProvider = ({ children }) => {
 
   const pagarContraEntrega = () => {
     cerrarCarrito();
-    // Te enviará directo al formulario sin pedir login por ahora para que puedas probarlo
-    window.location.href = '/pago-contra-entrega';
+    // El pedido se guarda a nombre del cliente: si no ha iniciado sesión, primero se la pedimos
+    // y al entrar lo llevamos directo al formulario de envío.
+    if (!cliente) {
+      abrirAuth('login', {
+        destino: '/pago-contra-entrega',
+        mensaje: 'Inicia sesión o crea tu cuenta para continuar con tu pedido.',
+      });
+      return;
+    }
+    navigate('/pago-contra-entrega');
   };
 
   const pagarConPayPal = () => {

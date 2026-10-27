@@ -102,6 +102,34 @@ export async function obtenerPedidosCliente(clienteId) {
   return Array.isArray(datos) ? datos : datos.pedidos ?? [];
 }
 
+// Zonas de envío configuradas en la tabla ENVIOS: [{ id, departamento, municipio, zonaReferencia, costoEnvio }]
+export async function obtenerEnvios() {
+  let response;
+  try {
+    response = await fetch(`${BASE_URL}/api/envios`);
+  } catch {
+    throw new Error('No pudimos conectar con el servidor. Intenta de nuevo en un momento.');
+  }
+  if (!response.ok) throw new Error('No pudimos cargar las zonas de envío.');
+  const datos = await response.json().catch(() => []);
+  return Array.isArray(datos) ? datos : [];
+}
+
+// Crea un pedido en la base de datos (POST /api/pedidos).
+// Devuelve { mensaje, pedido: { id, fecha, total, estado, metodo } }
+export function crearPedido({ clienteId, envioId, departamento, municipio, metodoPago, direccionEntrega, productos }) {
+  return postJson('/api/pedidos', {
+    clienteId,
+    envioId,
+    departamento,
+    municipio,
+    metodoPago,
+    direccionEntrega,
+    productos, // [{ productoId, cantidad }]
+  });
+}
+
+
 
 // Registro de productos (soporta FormData con imagen)
 export async function registrarProducto(formData) {

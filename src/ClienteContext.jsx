@@ -38,10 +38,16 @@ export const ClienteProvider = ({ children }) => {
   // Sesión del CLIENTE (la del administrador sigue en AuthContext)
   const [cliente, setCliente] = useState(leerSesionGuardada);
   const [authAbierto, setAuthAbierto] = useState(false);
-  const [vistaInicial, setVistaInicial] = useState('login'); // 'login' | 'registro'
+   const [vistaInicial, setVistaInicial] = useState('login'); // 'login' | 'registro'
+  // A dónde ir después de iniciar sesión (por defecto "Mi cuenta") y mensaje opcional para el modal
+  const [destinoAuth, setDestinoAuth] = useState(null);
+  const [mensajeAuth, setMensajeAuth] = useState('');
 
-  const abrirAuth = useCallback((vista = 'login') => {
+  // Ej.: abrirAuth('login', { destino: '/pago-contra-entrega', mensaje: 'Inicia sesión para continuar' })
+  const abrirAuth = useCallback((vista = 'login', { destino = null, mensaje = '' } = {}) => {
     setVistaInicial(vista);
+    setDestinoAuth(destino);
+    setMensajeAuth(mensaje);
     setAuthAbierto(true);
   }, []);
 
@@ -79,6 +85,8 @@ export const ClienteProvider = ({ children }) => {
         estaLogueado: Boolean(cliente),
         authAbierto,
         vistaInicial,
+        destinoAuth,
+        mensajeAuth,
         abrirAuth,
         cerrarAuth,
         iniciarSesion,
