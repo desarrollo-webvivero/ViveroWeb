@@ -3,6 +3,7 @@ import { ArrowLeft, Truck, MapPin, Phone, CheckCircle, LogIn, UserPlus } from 'l
 import { Link } from 'react-router-dom';
 import { useCart } from './CartContext';
 import { useCliente } from './ClienteContext';
+import { useConfirm } from './ConfirmDialog';
 import { crearPedido, obtenerEnvios } from './services/api';
 import emailjs from '@emailjs/browser';
 
@@ -26,6 +27,7 @@ const claseCampo =
 export default function PagoContraEntrega() {
   const { cart, vaciarCarrito } = useCart();
   const { cliente, abrirAuth } = useCliente();
+  const confirmar = useConfirm();
   const [cargando, setCargando] = useState(false);
   const [pedidoCompletado, setPedidoCompletado] = useState(false);
   const [numeroPedido, setNumeroPedido] = useState(null);
@@ -136,6 +138,23 @@ export default function PagoContraEntrega() {
       setError('Selecciona el departamento y municipio de entrega.');
       return;
     }
+
+    // Resumen del pedido antes de guardarlo
+    const totalArticulos = cart.reduce((n, item) => n + item.cantidad, 0);
+    const ok = await confirmar({
+      titulo: '¿Confirmar tu pedido?',
+      mensaje: (
+        <div className="text-left bg-vivero-cream rounded-xl p-4 space-y-1">
+          <p><strong>Artículos:</strong> {totalArticulos}</p>
+          <p><strong>Envío a:</strong> {envioSeleccionado.municipio}, {envioSeleccionado.departamento}</p>
+          <p><strong>Dirección:</strong> {datosEnvio.direccion}</p>
+          <p className="text-base pt-1"><strong>Total a pagar al recibir:</strong> {formatearQ(total)}</p>
+        </div>
+      ),
+      textoConfirmar: 'Sí, confirmar pedido',
+      textoCancelar: 'Revisar',
+    });
+    if (!ok) return;
 
     setCargando(true);
     setError('');

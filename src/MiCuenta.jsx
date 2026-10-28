@@ -16,6 +16,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { useCliente } from './ClienteContext';
+import { useConfirm } from './ConfirmDialog';
 import { obtenerPedidosCliente } from './services/api';
 import Footer from './Footer';
 
@@ -84,6 +85,7 @@ function Dato({ icono: Icono, etiqueta, valor }) {
 export default function MiCuenta() {
   const { cliente, abrirAuth, cerrarSesion } = useCliente();
   const navigate = useNavigate();
+  const confirmar = useConfirm();
 
   const [pestana, setPestana] = useState('resumen'); // 'resumen' | 'pedidos' | 'perfil'
   const [carga, setCarga] = useState({ estado: 'cargando', pedidos: [], error: '' });
@@ -117,7 +119,13 @@ export default function MiCuenta() {
     setIntento((n) => n + 1);
   };
 
-  const salir = () => {
+  const salir = async () => {
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Podrás volver a entrar cuando quieras con tu correo y contraseña.',
+      textoConfirmar: 'Sí, cerrar sesión',
+    });
+    if (!ok) return;
     cerrarSesion();
     navigate('/');
   };

@@ -3,9 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 // AQUÍ ESTABA EL ERROR: Agregué los íconos faltantes (ShoppingBag, Users, LayoutDashboard, LogOut)
 import { PackagePlus, Save, Edit, Trash2, X, UploadCloud, ShoppingBag, Users, LayoutDashboard, LogOut } from 'lucide-react';
 import { apiService } from './services/api';
+import { useConfirm } from './ConfirmDialog';
+import { useAuth } from './AuthContext';
 
 export default function AdminPanel() {
   const navigate = useNavigate();
+  const confirmar = useConfirm();
+  const { logout } = useAuth();
   const [producto, setProducto] = useState({
     nombre: '', precio: '', stock: '', categoria: '', descripcion: '', imagenArchivo: null, imagenPreview: ''
   });
@@ -41,6 +45,17 @@ export default function AdminPanel() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Al editar, confirmamos antes de sobrescribir el producto
+    if (editandoId) {
+      const ok = await confirmar({
+        titulo: '¿Guardar los cambios?',
+        mensaje: `Se actualizará "${producto.nombre}" en el catálogo.`,
+        textoConfirmar: 'Sí, guardar cambios',
+      });
+      if (!ok) return;
+    }
+
     setCargando(true);
 
     const formData = new FormData();
@@ -95,7 +110,14 @@ export default function AdminPanel() {
   };
 
   const borrarProducto = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar permanentemente este producto?")) {
+    const nombre = listaProductos.find((p) => p.id === id)?.nombre || 'este producto';
+    const ok = await confirmar({
+      titulo: '¿Eliminar producto?',
+      mensaje: `"${nombre}" se eliminará permanentemente del inventario. Esta acción no se puede deshacer.`,
+      textoConfirmar: 'Sí, eliminar',
+      peligro: true,
+    });
+    if (ok) {
       try {
         await apiService.eliminarProducto(id);
         setMensaje("Producto eliminado del inventario.");
@@ -107,7 +129,16 @@ export default function AdminPanel() {
     }
   };
 
-  const handleCerrarSesion = () => navigate('/login');
+  const handleCerrarSesion = async () => {
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Tendrás que volver a ingresar la contraseña para entrar al panel.',
+      textoConfirmar: 'Sí, cerrar sesión',
+    });
+    if (!ok) return;
+    logout();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-vivero-cream font-sans flex flex-col md:flex-row">

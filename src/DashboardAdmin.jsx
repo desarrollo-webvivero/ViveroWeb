@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, PackagePlus, ShoppingBag, Users, LogOut, TrendingUp, Package, AlertTriangle, DollarSign } from 'lucide-react';
+import { useConfirm } from './ConfirmDialog';
+import { useAuth } from './AuthContext';
 
 export default function DashboardAdmin() {
   const navigate = useNavigate();
+  const confirmar = useConfirm();
+  const { logout } = useAuth();
   const [cargando, setCargando] = useState(true);
   const [errorApi, setErrorApi] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
@@ -28,8 +32,15 @@ export default function DashboardAdmin() {
     cargarDatosReales();
   }, []);
 
-  const handleCerrarSesion = () => {
-    navigate('/login'); 
+  const handleCerrarSesion = async () => {
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Tendrás que volver a ingresar la contraseña para entrar al panel.',
+      textoConfirmar: 'Sí, cerrar sesión',
+    });
+    if (!ok) return;
+    logout();
+    navigate('/login');
   };
 
   // Soporta estructura plana o anidada en 'metricas' desde Spring Boot

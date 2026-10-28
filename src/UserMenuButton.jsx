@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { User, ChevronDown, LogOut } from 'lucide-react';
 import { useCliente } from './ClienteContext';
+import { useConfirm } from './ConfirmDialog';
 
 // variant: 'desktop' (barra superior) | 'mobile' (menú hamburguesa)
 // onAction: se llama al abrir el modal, ir a Mi cuenta o cerrar sesión (sirve para cerrar el menú móvil)
 export default function UserMenuButton({ variant = 'desktop', onAction }) {
   const { cliente, abrirAuth, cerrarSesion } = useCliente();
+  const confirmar = useConfirm();
   const [abierto, setAbierto] = useState(false);
   const contenedorRef = useRef(null);
 
@@ -29,10 +31,15 @@ export default function UserMenuButton({ variant = 'desktop', onAction }) {
     abrirAuth('login');
   };
 
-  const handleSalir = () => {
-    cerrarSesion();
+  const handleSalir = async () => {
     setAbierto(false);
     onAction?.();
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Podrás volver a entrar cuando quieras con tu correo y contraseña.',
+      textoConfirmar: 'Sí, cerrar sesión',
+    });
+    if (ok) cerrarSesion();
   };
 
   /* ---------- MÓVIL ---------- */

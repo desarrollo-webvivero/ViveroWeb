@@ -17,10 +17,12 @@ import DashboardAdmin from './DashboardAdmin';
 import PanelPedidos from './PanelPedidos';
 import PanelClientes from './PanelClientes';
 import MiCuenta from './MiCuenta.jsx'
+import { ConfirmProvider } from './ConfirmDialog.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
+      <ConfirmProvider>
       <AuthProvider>
         <ClienteProvider>
           <CartProvider>
@@ -56,6 +58,7 @@ createRoot(document.getElementById('root')).render(
           </CartProvider>
         </ClienteProvider>
       </AuthProvider>
+      </ConfirmProvider>
     </BrowserRouter>
   </StrictMode>,
 )

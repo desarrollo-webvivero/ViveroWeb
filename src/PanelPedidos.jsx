@@ -1,9 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, PackagePlus, ShoppingBag, Users, LogOut, Eye, Search, CheckCircle, XCircle, Truck } from 'lucide-react';
+import { useConfirm } from './ConfirmDialog';
+import { useAuth } from './AuthContext';
+
+// Texto de la ventana de confirmación para cada cambio de estado
+const CONFIRMACION_ESTADO = {
+  ENVIADO: {
+    titulo: (id) => `¿Marcar el pedido #${id} como enviado?`,
+    mensaje: 'El cliente verá su pedido como "En camino".',
+    textoConfirmar: 'Sí, marcar como enviado',
+  },
+  ENTREGADO: {
+    titulo: (id) => `¿Marcar el pedido #${id} como entregado?`,
+    mensaje: 'Confirma que el cliente ya recibió su pedido.',
+    textoConfirmar: 'Sí, marcar como entregado',
+  },
+  CANCELADO: {
+    titulo: (id) => `¿Cancelar el pedido #${id}?`,
+    mensaje: 'Esta acción detendrá el envío y no se puede deshacer.',
+    textoConfirmar: 'Sí, cancelar pedido',
+    textoCancelar: 'No, mantenerlo',
+    peligro: true,
+  },
+};
 
 export default function PanelPedidos() {
   const navigate = useNavigate();
+  const confirmar = useConfirm();
+  const { logout } = useAuth();
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -15,7 +40,7 @@ export default function PanelPedidos() {
     try {
       const response = await fetch(API_URL);
       if (response.ok) {
-                const data = await response.json();
+        const data = await response.json();
         // El backend manda { id, cliente, fecha, total, estado, metodo };
         // aquí lo pasamos a los nombres que usa esta tabla
         setPedidos(data.map((p) => ({
@@ -39,13 +64,23 @@ export default function PanelPedidos() {
     cargarPedidos();
   }, []);
 
-  const handleCerrarSesion = () => navigate('/login');
+  const handleCerrarSesion = async () => {
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Tendrás que volver a ingresar la contraseña para entrar al panel.',
+      textoConfirmar: 'Sí, cerrar sesión',
+    });
+    if (!ok) return;
+    logout();
+    navigate('/login');
+  };
 
   // 2. CAMBIAR ESTADO Y NOTIFICAR A SPRING BOOT (PUT)
   const cambiarEstado = async (id, nuevoEstado) => {
-    if (nuevoEstado === 'CANCELADO') {
-      const confirmar = window.confirm("¿Estás seguro de cancelar este pedido? Esta acción detendrá el envío.");
-      if (!confirmar) return;
+    const texto = CONFIRMACION_ESTADO[nuevoEstado];
+    if (texto) {
+      const ok = await confirmar({ ...texto, titulo: texto.titulo(id) });
+      if (!ok) return;
     }
 
     try {

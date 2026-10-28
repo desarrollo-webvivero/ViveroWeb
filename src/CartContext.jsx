@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { X, ShoppingBag, Trash2, ArrowRight, MessageCircle, Truck, CreditCard } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCliente } from './ClienteContext';
+import { useConfirm } from './ConfirmDialog';
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
@@ -19,6 +20,7 @@ export const CartProvider = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { cliente, abrirAuth } = useCliente();
+  const confirmar = useConfirm();
   // Definimos en qué rutas NO queremos que aparezca el botón flotante
   const rutasAdmin = ['/dashboard', '/admin', '/pedidos', '/clientes', '/login'];
   const esRutaAdmin = rutasAdmin.some(ruta => location.pathname.startsWith(ruta));
@@ -39,7 +41,16 @@ export const CartProvider = ({ children }) => {
     setIsOpen(true);
   };
 
-  const eliminarDelCarrito = (id) => setCart((prev) => prev.filter((item) => item.id !== id));
+  const eliminarDelCarrito = async (id) => {
+    const nombre = cart.find((item) => item.id === id)?.nombre || 'este producto';
+    const ok = await confirmar({
+      titulo: '¿Quitar del carrito?',
+      mensaje: `Se quitará "${nombre}" de tu carrito.`,
+      textoConfirmar: 'Sí, quitar',
+      peligro: true,
+    });
+    if (ok) setCart((prev) => prev.filter((item) => item.id !== id));
+  };
   
   // 3. VACIAR CARRITO: Borramos el estado y la memoria.
   const vaciarCarrito = () => {

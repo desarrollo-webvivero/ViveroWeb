@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, PackagePlus, ShoppingBag, Users, LogOut, Mail, Phone, Search } from 'lucide-react';
+import { useConfirm } from './ConfirmDialog';
+import { useAuth } from './AuthContext';
 
 export default function PanelClientes() {
   const navigate = useNavigate();
+  const confirmar = useConfirm();
+  const { logout } = useAuth();
   // DATOS SIMULADOS
   const [clientes] = useState([
     { id: 1, nombre: "María González", correo: "maria@email.com", telefono: "5555-1111", pedidos: 3, gastado: 1050.00 },
@@ -11,7 +15,16 @@ export default function PanelClientes() {
     { id: 3, nombre: "Ana López", correo: "ana@email.com", telefono: "5555-3333", pedidos: 5, gastado: 2450.00 },
   ]);
 
-  const handleCerrarSesion = () => navigate('/login');
+  const handleCerrarSesion = async () => {
+    const ok = await confirmar({
+      titulo: '¿Cerrar sesión?',
+      mensaje: 'Tendrás que volver a ingresar la contraseña para entrar al panel.',
+      textoConfirmar: 'Sí, cerrar sesión',
+    });
+    if (!ok) return;
+    logout();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-vivero-cream font-sans flex flex-col md:flex-row">
