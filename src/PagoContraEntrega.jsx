@@ -186,7 +186,7 @@ export default function PagoContraEntrega() {
     }
   };
 
-  // Pantalla de Éxito
+   // Pantalla de Éxito
   if (pedidoCompletado) {
     return (
       <div className="min-h-screen bg-vivero-cream flex flex-col items-center justify-center p-4">
@@ -197,14 +197,9 @@ export default function PagoContraEntrega() {
           <p className="text-vivero-dark/70 mb-8">
             Hemos recibido tu solicitud exitosamente. Tu pedido será preparado y enviado a la dirección indicada. El pago se realizará al momento de la entrega.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/mi-cuenta" className="inline-block bg-vivero-purple text-white font-bold py-3 px-8 rounded-xl hover:bg-opacity-90 transition-colors">
-              Ver mis pedidos
-            </Link>
-            <Link to="/" className="inline-block bg-vivero-dark text-white font-bold py-3 px-8 rounded-xl hover:bg-vivero-green transition-colors">
-              Volver a la tienda
-            </Link>
-          </div>
+          <Link to="/mi-cuenta" className="inline-block bg-vivero-purple text-white font-bold py-3 px-8 rounded-xl hover:bg-opacity-90 transition-colors">
+            Ver mis pedidos
+          </Link>
         </div>
       </div>
     );
