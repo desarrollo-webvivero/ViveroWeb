@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
+  ArrowRight,
   Home,
   Package,
   User,
@@ -259,10 +260,9 @@ export default function MiCuenta() {
                 ))}
               </div>
 
-            {/* CATEGORÍAS */}
-            <section id="categorias" className="py-20 bg-vivero-cream">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
+              {/* CATEGORÍAS (mismo panel que en la página de inicio) */}
+              <section id="categorias">
+                <div className="text-center mb-10">
                   <h2 className="text-3xl md:text-4xl font-bold text-vivero-dark font-serif mb-4">Nuestras Categorías</h2>
                   <div className="w-24 h-1 bg-vivero-purple mx-auto rounded-full mb-6"></div>
                   <p className="text-lg text-vivero-dark/70 max-w-2xl mx-auto">Encuentra la planta ideal según tus necesidades y espacios.</p>
@@ -299,14 +299,7 @@ export default function MiCuenta() {
                     </div>
                   </Link>
                 </div>
-              </div>
-            </section>
-
-              
-                
-                
-               
-              </div>
+              </section>
             </div>
           )}
 
