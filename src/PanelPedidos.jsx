@@ -15,8 +15,16 @@ export default function PanelPedidos() {
     try {
       const response = await fetch(API_URL);
       if (response.ok) {
-        const data = await response.json();
-        setPedidos(data);
+                const data = await response.json();
+        // El backend manda { id, cliente, fecha, total, estado, metodo };
+        // aquí lo pasamos a los nombres que usa esta tabla
+        setPedidos(data.map((p) => ({
+          ...p,
+          idCotizacion: p.idCotizacion ?? p.id,
+          fechaSolicitud: p.fechaSolicitud ?? p.fecha,
+          totalEstimado: p.totalEstimado ?? p.total,
+          metodoPago: p.metodoPago ?? p.metodo,
+        })));
       } else {
         console.error("Error al obtener los pedidos del servidor");
       }
