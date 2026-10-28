@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useCart } from './CartContext';
 import { apiService, verificarStock } from './services/api';
 
 export default function CatalogoExterior() {
+  const location = useLocation();
+  const desdeCuenta = location.state?.desde === '/mi-cuenta';
   const { agregarAlCarrito } = useCart();
   const [plantas, setPlantas] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -54,8 +56,8 @@ export default function CatalogoExterior() {
     <div className="min-h-screen bg-vivero-cream p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-12 border-b border-vivero-green/20 pb-6">
-          <Link to="/" className="flex items-center text-vivero-dark hover:text-vivero-purple font-medium transition-colors mb-4 sm:mb-0 w-fit">
-            <ArrowLeft className="w-5 h-5 mr-2" /> Volver al inicio
+          <Link to={desdeCuenta ? '/mi-cuenta' : '/'} className="flex items-center text-vivero-dark hover:text-vivero-purple font-medium transition-colors mb-4 sm:mb-0 w-fit">
+            <ArrowLeft className="w-5 h-5 mr-2" /> {desdeCuenta ? 'Volver a mi cuenta' : 'Volver al inicio'}
           </Link>
           <h1 className="text-3xl md:text-4xl font-bold font-serif text-vivero-dark text-center">
             Jardinería Exterior
