@@ -259,25 +259,53 @@ export default function MiCuenta() {
                 ))}
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="font-bold font-serif text-xl text-vivero-dark">Pedidos recientes</h2>
-                  {pedidos.length > 3 && (
-                    <button
-                      type="button"
-                      onClick={() => setPestana('pedidos')}
-                      className="text-sm font-semibold text-vivero-purple hover:underline"
-                    >
-                      Ver todos
-                    </button>
-                  )}
+            {/* CATEGORÍAS */}
+            <section id="categorias" className="py-20 bg-vivero-cream">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-16">
+                  <h2 className="text-3xl md:text-4xl font-bold text-vivero-dark font-serif mb-4">Nuestras Categorías</h2>
+                  <div className="w-24 h-1 bg-vivero-purple mx-auto rounded-full mb-6"></div>
+                  <p className="text-lg text-vivero-dark/70 max-w-2xl mx-auto">Encuentra la planta ideal según tus necesidades y espacios.</p>
                 </div>
-                <div className="space-y-3">
-                  {pedidos.slice(0, 3).map((p) => (
-                    <TarjetaPedido key={p.id} pedido={p} />
-                  ))}
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <Link to="/interior" className="group relative rounded-3xl overflow-hidden shadow-lg cursor-pointer aspect-[4/5] block">
+                    <img src="/plantas-interior.jpg" alt="Plantas de Interior" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-vivero-dark/90 via-vivero-dark/20 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-300 group-hover:-translate-y-2">
+                      <h3 className="text-2xl font-bold text-white font-serif mb-2">Plantas de Interior</h3>
+                      <p className="text-vivero-cream/80 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Perfectas para dar vida a salas, oficinas y habitaciones.</p>
+                      <span className="text-vivero-yellow font-medium flex items-center">Ver selección <ArrowRight className="w-4 h-4 ml-1" /></span>
+                    </div>
+                  </Link>
+
+                  <Link to="/frutales" className="group relative rounded-3xl overflow-hidden shadow-lg cursor-pointer aspect-[4/5] block">
+                    <img src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?q=80&w=800&auto=format&fit=crop" alt="Árboles Frutales" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-vivero-dark/90 via-vivero-dark/20 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-300 group-hover:-translate-y-2">
+                      <h3 className="text-2xl font-bold text-white font-serif mb-2">Árboles Frutales</h3>
+                      <p className="text-vivero-cream/80 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Cultiva tus propios frutos con nuestras especies nativas e injertos.</p>
+                      <span className="text-vivero-yellow font-medium flex items-center">Ver selección <ArrowRight className="w-4 h-4 ml-1" /></span>
+                    </div>
+                  </Link>
+
+                  <Link to="/exterior" className="group relative rounded-3xl overflow-hidden shadow-lg cursor-pointer aspect-[4/5] block">
+                    <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?q=80&w=800&auto=format&fit=crop" alt="Plantas Ornamentales" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-vivero-dark/90 via-vivero-dark/20 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-300 group-hover:-translate-y-2">
+                      <h3 className="text-2xl font-bold text-white font-serif mb-2">Jardinería Exterior</h3>
+                      <p className="text-vivero-cream/80 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Diseña jardines espectaculares con flores y follajes de temporada.</p>
+                      <span className="text-vivero-yellow font-medium flex items-center">Ver selección <ArrowRight className="w-4 h-4 ml-1" /></span>
+                    </div>
+                  </Link>
                 </div>
-                {estadoPedidos}
+              </div>
+            </section>
+
+              
+                
+                
+               
               </div>
             </div>
           )}
