@@ -14,10 +14,14 @@ import {
   ShoppingBag,
   BadgeCheck,
   MessageCircle,
+  X,
+  MapPin,
+  CreditCard,
+  Eye,
 } from 'lucide-react';
 import { useCliente } from './ClienteContext';
 import { useConfirm } from './ConfirmDialog';
-import { obtenerPedidosCliente } from './services/api';
+import { obtenerPedidosCliente, obtenerDetallePedido } from './services/api';
 import Footer from './Footer';
 
 const WHATSAPP = '50244508589'; // +502 4450-8589
@@ -47,22 +51,190 @@ const formatearFecha = (valor) => {
 
 const formatearQuetzales = (valor) => `Q${(Number(valor) || 0).toFixed(2)}`;
 
+const NOMBRE_METODO = {
+  CONTRA_ENTREGA: 'Pago contra entrega',
+  PAYPAL: 'PayPal',
+  WHATSAPP: 'WhatsApp',
+};
+const nombreMetodo = (m) => NOMBRE_METODO[m] ?? m ?? '—';
+
 function Etiqueta({ estado }) {
   const e = ESTILOS_ESTADO[estado] ?? ESTILOS_ESTADO.PENDIENTE;
   return <span className={`px-3 py-1 rounded-full text-xs font-bold ${e.clase}`}>{e.texto}</span>;
 }
 
-function TarjetaPedido({ pedido }) {
+function TarjetaPedido({ pedido, onVerDetalle }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 p-5 bg-white border border-gray-100 rounded-2xl">
       <div>
         <p className="font-bold text-vivero-dark">Pedido #{pedido.id}</p>
         <p className="text-sm text-vivero-dark/60">{formatearFecha(pedido.fecha)}</p>
-        {pedido.metodo && <p className="text-xs text-vivero-dark/50 mt-1">{pedido.metodo}</p>}
+        {pedido.metodo && <p className="text-xs text-vivero-dark/50 mt-1">{nombreMetodo(pedido.metodo)}</p>}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <span className="font-bold text-vivero-dark">{formatearQuetzales(pedido.total)}</span>
         <Etiqueta estado={pedido.estado} />
+        <button
+          type="button"
+          onClick={() => onVerDetalle(pedido)}
+          className="inline-flex items-center px-3 py-1.5 rounded-xl border border-vivero-purple/30 text-vivero-purple text-sm font-semibold hover:bg-vivero-purple/5 transition-colors"
+        >
+          <Eye className="w-4 h-4 mr-1" /> Ver detalle
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function FilaTotal({ etiqueta, valor, fuerte = false }) {
+  return (
+    <div className={`flex justify-between ${fuerte ? 'text-lg font-bold text-vivero-dark pt-2 border-t border-gray-100' : 'text-sm text-vivero-dark/70'}`}>
+      <span>{etiqueta}</span>
+      <span className={fuerte ? 'text-vivero-green' : ''}>{valor}</span>
+    </div>
+  );
+}
+
+// Ventana con el detalle de un pedido. Se cierra con la X, con Escape o haciendo clic fuera.
+function DetallePedido({ pedido, clienteId, onCerrar }) {
+  const [carga, setCarga] = useState({ estado: 'cargando', detalle: null });
+
+  useEffect(() => {
+    let cancelado = false;
+    obtenerDetallePedido(pedido.id, clienteId)
+      .then((detalle) => !cancelado && setCarga({ estado: 'listo', detalle }))
+      .catch(() => !cancelado && setCarga({ estado: 'basico', detalle: null }));
+    return () => {
+      cancelado = true;
+    };
+  }, [pedido.id, clienteId]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onCerrar();
+    };
+    document.addEventListener('keydown', onKey);
+    const overflowPrevio = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = overflowPrevio;
+    };
+  }, [onCerrar]);
+
+  // Si el detalle aún no está disponible en el servidor, mostramos lo que ya tenemos del pedido
+  const d = carga.detalle ?? {
+    id: pedido.id,
+    fecha: pedido.fecha,
+    estado: pedido.estado,
+    metodo: pedido.metodo,
+    total: pedido.total,
+    productos: [],
+  };
+  const estado = String(d.estado ?? pedido.estado).toUpperCase();
+  const productos = d.productos ?? [];
+  const zona = [d.municipio, d.departamento].filter(Boolean).join(', ');
+
+  return (
+    <div
+      className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-vivero-dark/60 backdrop-blur-sm"
+      onMouseDown={onCerrar}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="detalle-titulo"
+        onMouseDown={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl p-6 sm:p-8 border border-vivero-green/20"
+      >
+        <button
+          type="button"
+          onClick={onCerrar}
+          aria-label="Cerrar"
+          className="absolute top-4 right-4 p-2 text-vivero-dark/40 hover:text-vivero-dark hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Encabezado */}
+        <div className="pr-10 mb-6">
+          <p className="text-vivero-purple font-bold text-sm uppercase tracking-wider mb-1">Detalle del pedido</p>
+          <h2 id="detalle-titulo" className="text-2xl font-bold font-serif text-vivero-dark">Pedido #{d.id}</h2>
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            <Etiqueta estado={estado} />
+            <span className="text-sm text-vivero-dark/60">{formatearFecha(d.fecha)}</span>
+          </div>
+        </div>
+
+        {carga.estado === 'cargando' ? (
+          <p className="text-center text-vivero-dark/60 py-10">Cargando detalle…</p>
+        ) : (
+          <div className="space-y-6">
+            {/* Productos */}
+            <section>
+              <h3 className="flex items-center font-bold text-vivero-dark mb-3">
+                <ShoppingBag className="w-4 h-4 mr-2 text-vivero-green" /> Productos
+              </h3>
+              {productos.length > 0 ? (
+                <ul className="divide-y divide-gray-100 border border-gray-100 rounded-2xl">
+                  {productos.map((p, i) => (
+                    <li key={i} className="flex items-center justify-between gap-4 p-4">
+                      <div className="min-w-0">
+                        <p className="font-medium text-vivero-dark truncate">{p.nombre}</p>
+                        <p className="text-sm text-vivero-dark/60">
+                          {p.cantidad} × {formatearQuetzales(p.precioUnitario)}
+                        </p>
+                      </div>
+                      <span className="font-bold text-vivero-dark whitespace-nowrap">{formatearQuetzales(p.subtotal)}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-vivero-dark/60 bg-vivero-cream rounded-xl p-4">
+                  El detalle de productos no está disponible para este pedido.
+                </p>
+              )}
+            </section>
+
+            {/* Entrega */}
+            <section>
+              <h3 className="flex items-center font-bold text-vivero-dark mb-3">
+                <MapPin className="w-4 h-4 mr-2 text-vivero-green" /> Entrega
+              </h3>
+              <div className="bg-vivero-cream rounded-2xl p-4 text-sm space-y-1">
+                <p>
+                  <span className="text-vivero-dark/60">Zona: </span>
+                  <span className="font-medium text-vivero-dark">
+                    {zona || 'No disponible'}{d.zonaReferencia ? ` (${d.zonaReferencia})` : ''}
+                  </span>
+                </p>
+                <p>
+                  <span className="text-vivero-dark/60">Dirección: </span>
+                  <span className="font-medium text-vivero-dark">{d.direccionEntrega || 'No registrada'}</span>
+                </p>
+              </div>
+            </section>
+
+            {/* Pago */}
+            <section>
+              <h3 className="flex items-center font-bold text-vivero-dark mb-3">
+                <CreditCard className="w-4 h-4 mr-2 text-vivero-green" /> Pago
+              </h3>
+              <div className="border border-gray-100 rounded-2xl p-4 space-y-2">
+                <FilaTotal etiqueta="Método" valor={nombreMetodo(d.metodo)} />
+                {d.subtotal != null && <FilaTotal etiqueta="Productos" valor={formatearQuetzales(d.subtotal)} />}
+                {d.costoEnvio != null && <FilaTotal etiqueta="Envío" valor={formatearQuetzales(d.costoEnvio)} />}
+                <FilaTotal etiqueta="Total" valor={formatearQuetzales(d.total)} fuerte />
+              </div>
+            </section>
+
+            {carga.estado === 'basico' && (
+              <p className="text-xs text-center text-vivero-dark/50">
+                Pronto podrás ver aquí más información de tus pedidos.
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -90,6 +262,7 @@ export default function MiCuenta() {
   const [pestana, setPestana] = useState('resumen'); // 'resumen' | 'pedidos' | 'perfil'
   const [carga, setCarga] = useState({ estado: 'cargando', pedidos: [], error: '' });
   const [intento, setIntento] = useState(0);
+  const [pedidoAbierto, setPedidoAbierto] = useState(null); // pedido cuyo detalle se está viendo
 
   const clienteId = cliente?.id;
 
@@ -326,7 +499,7 @@ export default function MiCuenta() {
               </div>
               <div className="space-y-3">
                 {pedidos.map((p) => (
-                  <TarjetaPedido key={p.id} pedido={p} />
+                  <TarjetaPedido key={p.id} pedido={p} onVerDetalle={setPedidoAbierto} />
                 ))}
               </div>
               {estadoPedidos}
@@ -375,6 +548,14 @@ export default function MiCuenta() {
           <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
         </svg>
       </a>
+
+      {pedidoAbierto && (
+        <DetallePedido
+          pedido={pedidoAbierto}
+          clienteId={cliente.id}
+          onCerrar={() => setPedidoAbierto(null)}
+        />
+      )}
 
       <Footer />
     </div>

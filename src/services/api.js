@@ -102,6 +102,27 @@ export async function obtenerPedidosCliente(clienteId) {
   return Array.isArray(datos) ? datos : datos.pedidos ?? [];
 }
 
+
+
+// Detalle de UN pedido: productos, dirección, envío y totales.
+//  GET /api/pedidos/{id}/detalle?clienteId=...
+export async function obtenerDetallePedido(pedidoId, clienteId) {
+  let response;
+  try {
+    response = await fetch(`${BASE_URL}/api/pedidos/${pedidoId}/detalle?clienteId=${clienteId}`);
+  } catch {
+    throw new Error('No pudimos conectar con el servidor. Intenta de nuevo en un momento.');
+  }
+  if (!response.ok) {
+    const error = new Error('No pudimos cargar el detalle del pedido.');
+    error.status = response.status;
+    throw error;
+  }
+  return response.json();
+}
+
+
+
 // Zonas de envío configuradas en la tabla ENVIOS: [{ id, departamento, municipio, zonaReferencia, costoEnvio }]
 export async function obtenerEnvios() {
   let response;
