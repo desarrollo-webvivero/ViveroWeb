@@ -1,5 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://vivero-backend-2.onrender.com';
-
+export const BASE_URL = import.meta.env.VITE_API_URL || 'https://viverobackend.onrender.com';
 // Rutas de clientes: si tu compañero las cambia, cámbialas AQUÍ
 const RUTAS_CLIENTES = {
   registro: '/api/clientes/registro',

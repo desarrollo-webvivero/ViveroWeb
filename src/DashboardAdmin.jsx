@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, PackagePlus, ShoppingBag, Users, LogOut, TrendingUp, Package, AlertTriangle, DollarSign } from 'lucide-react';
 import { useConfirm } from './ConfirmDialog';
 import { useAuth } from './AuthContext';
+import { BASE_URL } from './services/api';
 
 export default function DashboardAdmin() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function DashboardAdmin() {
   useEffect(() => {
     const cargarDatosReales = async () => {
       try {
-        const respuesta = await fetch('https://vivero-backend-2.onrender.com/api/dashboard/resume');
+          const respuesta = await fetch(`${BASE_URL}/api/dashboard/resume`);
         if (!respuesta.ok) {
           throw new Error(`HTTP Error: ${respuesta.status}`);
         }

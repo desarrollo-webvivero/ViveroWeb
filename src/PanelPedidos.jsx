@@ -3,6 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, PackagePlus, ShoppingBag, Users, LogOut, Eye, Search, CheckCircle, XCircle, Truck } from 'lucide-react';
 import { useConfirm } from './ConfirmDialog';
 import { useAuth } from './AuthContext';
+import { BASE_URL } from './services/api';
+
+
+
 
 // Texto de la ventana de confirmación para cada cambio de estado
 const CONFIRMACION_ESTADO = {
@@ -33,7 +37,7 @@ export default function PanelPedidos() {
   const [cargando, setCargando] = useState(true);
 
   // URL base de tu API Spring Boot
-  const API_URL = 'https://vivero-backend-2.onrender.com/api/pedidos';
+  const API_URL = `${BASE_URL}/api/pedidos`;
 
   // 1. CARGAR PEDIDOS DESDE EL BACKEND AL MONTAR EL COMPONENTE
   const cargarPedidos = async () => {
