@@ -20,7 +20,6 @@ export const CartProvider = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { cliente, abrirAuth } = useCliente();
-  const confirmar = useConfirm();
   // Definimos en qué rutas NO queremos que aparezca el botón flotante
   const rutasAdmin = ['/dashboard', '/admin', '/pedidos', '/clientes', '/login'];
   const esRutaAdmin = rutasAdmin.some(ruta => location.pathname.startsWith(ruta));
@@ -40,6 +39,8 @@ export const CartProvider = ({ children }) => {
     });
     setIsOpen(true);
   };
+
+  const confirmar = useConfirm();
 
   const eliminarDelCarrito = async (id) => {
     const nombre = cart.find((item) => item.id === id)?.nombre || 'este producto';
@@ -94,23 +95,23 @@ export const CartProvider = ({ children }) => {
     window.open(url, '_blank');
   };
 
-  const pagarContraEntrega = () => {
+  // El pedido se guarda a nombre del cliente: si no ha iniciado sesión, primero se la pedimos
+  // y al entrar lo llevamos directo al formulario de envío.
+  const irAPagar = (ruta) => {
     cerrarCarrito();
-    // El pedido se guarda a nombre del cliente: si no ha iniciado sesión, primero se la pedimos
-    // y al entrar lo llevamos directo al formulario de envío.
     if (!cliente) {
       abrirAuth('login', {
-        destino: '/pago-contra-entrega',
+        destino: ruta,
         mensaje: 'Inicia sesión o crea tu cuenta para continuar con tu pedido.',
       });
       return;
     }
-    navigate('/pago-contra-entrega');
+    navigate(ruta);
   };
 
-  const pagarConPayPal = () => {
-    alert("Redirigiendo a la pasarela segura de PayPal...");
-  };
+  const pagarContraEntrega = () => irAPagar('/pago-contra-entrega');
+
+  const pagarConPayPal = () => irAPagar('/pago-paypal');
 
   return (
     <CartContext.Provider value={{ cart, agregarAlCarrito, setIsOpen, vaciarCarrito }}>

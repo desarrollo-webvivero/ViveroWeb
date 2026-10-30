@@ -35,6 +35,7 @@ createRoot(document.getElementById('root')).render(
               <Route path="/exterior" element={<CatalogoExterior />} />
               <Route path="/login" element={<LoginAdmin />} />
               <Route path="/pago-contra-entrega" element={<PagoContraEntrega />} />
+              <Route path="/pago-paypal" element={<PagoContraEntrega metodo="PAYPAL" />} />
               <Route path="/mi-cuenta" element={<MiCuenta />} />
               
               {/* Rutas Protegidas (Privadas) */}

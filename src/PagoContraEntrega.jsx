@@ -1,10 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Truck, MapPin, Phone, CheckCircle, LogIn, UserPlus } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, Truck, MapPin, Phone, CheckCircle, LogIn, UserPlus, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { useCart } from './CartContext';
 import { useCliente } from './ClienteContext';
 import { useConfirm } from './ConfirmDialog';
-import { crearPedido, obtenerEnvios } from './services/api';
+import {
+  crearPedido,
+  obtenerEnvios,
+  obtenerConfigPayPal,
+  crearOrdenPayPal,
+  capturarPagoPayPal,
+} from './services/api';
 import emailjs from '@emailjs/browser';
 
 // Credenciales de EmailJS para avisar al vivero por correo.
@@ -24,7 +31,10 @@ const formatearQ = (valor) => `Q${(Number(valor) || 0).toFixed(2)}`;
 const claseCampo =
   'w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-vivero-green outline-none bg-white disabled:bg-gray-50 disabled:text-vivero-dark/40';
 
-export default function PagoContraEntrega() {
+// metodo: 'CONTRA_ENTREGA' (por defecto) o 'PAYPAL'. Ambos usan el mismo formulario de envío.
+export default function PagoContraEntrega({ metodo = 'CONTRA_ENTREGA' }) {
+  const esPayPal = metodo === 'PAYPAL';
+  const rutaPago = esPayPal ? '/pago-paypal' : '/pago-contra-entrega';
   const { cart, vaciarCarrito } = useCart();
   const { cliente, abrirAuth } = useCliente();
   const confirmar = useConfirm();
@@ -35,6 +45,9 @@ export default function PagoContraEntrega() {
 
   // Zonas de envío que existen en la tabla ENVIOS
   const [envios, setEnvios] = useState({ estado: 'cargando', lista: [], error: '' });
+  // Configuración pública de PayPal que manda el backend: Client ID y tasa de cambio
+  const [paypal, setPaypal] = useState({ estado: 'cargando', clientId: '', tasaCambio: null });
+  const tasaCambio = paypal.tasaCambio;
 
   // Estado del formulario (si hay sesión, rellenamos nombre y teléfono)
   const [datosEnvio, setDatosEnvio] = useState({
@@ -77,6 +90,20 @@ export default function PagoContraEntrega() {
     };
   }, []);
 
+  // Con PayPal, pedimos al backend el Client ID y la tasa de cambio (el Secret se queda en el backend)
+  useEffect(() => {
+    if (!esPayPal) return;
+    obtenerConfigPayPal()
+        .then((c) =>
+        setPaypal({
+          estado: 'listo',
+          clientId: c.configurado ? String(c.clientId || '').trim() : '',
+          tasaCambio: Number(c.tasaCambio) || null,
+        })
+      )
+      .catch(() => setPaypal({ estado: 'listo', clientId: '', tasaCambio: null }));
+  }, [esPayPal]);
+
   const departamentos = useMemo(
     () => [...new Set(envios.lista.map((e) => e.departamento))].sort((a, b) => a.localeCompare(b, 'es')),
     [envios.lista]
@@ -95,12 +122,13 @@ export default function PagoContraEntrega() {
   const subtotal = cart.reduce((sum, item) => sum + obtenerPrecioSeguro(item.precio) * item.cantidad, 0);
   const costoEnvio = Number(envioSeleccionado?.costoEnvio) || 0;
   const total = subtotal + costoEnvio;
+  const totalDolares = tasaCambio ? Math.round((total / tasaCambio) * 100) / 100 : null;
 
   const direccionCompleta = `${datosEnvio.direccion}, ${envioSeleccionado?.municipio ?? ''}, ${datosEnvio.departamento}. Referencias: ${datosEnvio.referencias || 'Ninguna'}`;
 
   const pedirSesion = (vista) =>
     abrirAuth(vista, {
-      destino: '/pago-contra-entrega',
+      destino: rutaPago,
       mensaje: 'Inicia sesión o crea tu cuenta para continuar con tu pedido.',
     });
 
@@ -128,14 +156,84 @@ export default function PagoContraEntrega() {
       .catch((err) => console.error('No se pudo enviar el correo de aviso:', err));
   };
 
+  // Datos del pedido que se envían al backend (los mismos para contra entrega y PayPal)
+  const armarPedido = () => ({
+    clienteId: cliente?.id,
+    envioId: envioSeleccionado?.id,
+    departamento: envioSeleccionado?.departamento,
+    municipio: envioSeleccionado?.municipio,
+    metodoPago: metodo,
+    direccionEntrega: direccionCompleta,
+    productos: cart.map((item) => ({ productoId: item.id, cantidad: item.cantidad })),
+  });
+
+  // Los botones de PayPal leen siempre la versión más reciente del pedido desde aquí
+  const pedidoRef = useRef(null);
+  useEffect(() => {
+    pedidoRef.current = armarPedido();
+  });
+
+  // Revisa que el formulario esté completo (PayPal no usa la validación del <form>)
+  const validarFormulario = () => {
+    if (!envioSeleccionado) return 'Selecciona el departamento y municipio de entrega.';
+    if (!datosEnvio.nombre.trim() || !datosEnvio.telefono.trim() || !datosEnvio.direccion.trim()) {
+      return 'Completa tu nombre, teléfono y dirección antes de pagar.';
+    }
+    return '';
+  };
+
+  const finalizarPedido = (idPedido) => {
+    enviarCorreoAviso(idPedido); // aviso al vivero (en segundo plano)
+    setNumeroPedido(idPedido);
+    setPedidoCompletado(true);
+    vaciarCarrito();
+  };
+
+  // ----- PayPal -----
+  const paypalOnClick = (_data, actions) => {
+    const problema = validarFormulario();
+    if (problema) {
+      setError(problema);
+      return actions.reject();
+    }
+    setError('');
+    return actions.resolve();
+  };
+
+  const paypalCrearOrden = async () => {
+    try {
+      const orden = await crearOrdenPayPal(pedidoRef.current);
+      return orden.id;
+    } catch (err) {
+      setError(err.message || 'No pudimos iniciar el pago con PayPal.');
+      throw err;
+    }
+  };
+
+  const paypalAprobado = async (data) => {
+    setCargando(true);
+    setError('');
+    try {
+      const respuesta = await capturarPagoPayPal({ paypalOrderId: data.orderID, pedido: pedidoRef.current });
+      finalizarPedido(respuesta.pedido?.id);
+    } catch (err) {
+      setError(err.message || 'No pudimos completar el pago. No se realizó ningún cobro.');
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // ----- Contra entrega -----
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (esPayPal) return; // con PayPal se paga con sus botones
     if (!cliente) {
       pedirSesion('login');
       return;
     }
-    if (!envioSeleccionado) {
-      setError('Selecciona el departamento y municipio de entrega.');
+    const problema = validarFormulario();
+    if (problema) {
+      setError(problema);
       return;
     }
 
@@ -160,25 +258,8 @@ export default function PagoContraEntrega() {
     setError('');
 
     try {
-      // 1. Guardamos el pedido en la base de datos
-      const respuesta = await crearPedido({
-        clienteId: cliente.id,
-        envioId: envioSeleccionado.id,
-        departamento: envioSeleccionado.departamento,
-        municipio: envioSeleccionado.municipio,
-        metodoPago: 'CONTRA_ENTREGA',
-        direccionEntrega: direccionCompleta,
-        productos: cart.map((item) => ({ productoId: item.id, cantidad: item.cantidad })),
-      });
-      const idPedido = respuesta.pedido?.id;
-
-      // 2. Avisamos al vivero por correo (en segundo plano)
-      enviarCorreoAviso(idPedido);
-
-      // 3. Mostramos la pantalla de éxito
-      setNumeroPedido(idPedido);
-      setPedidoCompletado(true);
-      vaciarCarrito();
+      const respuesta = await crearPedido(armarPedido());
+      finalizarPedido(respuesta.pedido?.id);
     } catch (err) {
       setError(err.message || 'No pudimos registrar tu pedido. Intenta de nuevo.');
     } finally {
@@ -186,7 +267,7 @@ export default function PagoContraEntrega() {
     }
   };
 
-   // Pantalla de Éxito
+  // Pantalla de Éxito
   if (pedidoCompletado) {
     return (
       <div className="min-h-screen bg-vivero-cream flex flex-col items-center justify-center p-4">
@@ -195,7 +276,9 @@ export default function PagoContraEntrega() {
           <h1 className="text-3xl font-bold font-serif text-vivero-dark mb-2">¡Pedido Confirmado!</h1>
           {numeroPedido && <p className="text-vivero-purple font-bold text-lg mb-4">Pedido #{numeroPedido}</p>}
           <p className="text-vivero-dark/70 mb-8">
-            Hemos recibido tu solicitud exitosamente. Tu pedido será preparado y enviado a la dirección indicada. El pago se realizará al momento de la entrega.
+            {esPayPal
+              ? 'Tu pago con PayPal se realizó con éxito. Tu pedido será preparado y enviado a la dirección indicada.'
+              : 'Hemos recibido tu solicitud exitosamente. Tu pedido será preparado y enviado a la dirección indicada. El pago se realizará al momento de la entrega.'}
           </p>
           <Link to="/mi-cuenta" className="inline-block bg-vivero-purple text-white font-bold py-3 px-8 rounded-xl hover:bg-opacity-90 transition-colors">
             Ver mis pedidos
@@ -267,10 +350,13 @@ export default function PagoContraEntrega() {
           {/* FORMULARIO DE ENVÍO */}
           <div className="lg:w-2/3 bg-white rounded-3xl shadow-xl p-6 sm:p-10 border border-vivero-green/20">
             <h1 className="text-3xl font-bold font-serif text-vivero-dark mb-2 flex items-center">
-              <Truck className="w-8 h-8 mr-3 text-vivero-green" /> Detalles de Envío
+              {esPayPal ? <CreditCard className="w-8 h-8 mr-3 text-vivero-green" /> : <Truck className="w-8 h-8 mr-3 text-vivero-green" />}
+              {esPayPal ? 'Pago con PayPal' : 'Detalles de Envío'}
             </h1>
             <p className="text-vivero-dark/60 mb-8 border-b border-gray-100 pb-4">
-              Ingresa los datos del domicilio donde deseas recibir tus plantas. Pago en efectivo al recibir.
+              {esPayPal
+                ? 'Ingresa los datos del domicilio donde deseas recibir tus plantas y paga de forma segura con PayPal o tarjeta.'
+                : 'Ingresa los datos del domicilio donde deseas recibir tus plantas. Pago en efectivo al recibir.'}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -345,9 +431,45 @@ export default function PagoContraEntrega() {
                 <p className="text-red-600 bg-red-50 border border-red-100 rounded-xl p-3 text-sm font-medium">{error}</p>
               )}
 
-              <button type="submit" disabled={!puedeConfirmar} className="w-full bg-vivero-dark text-white font-bold py-4 rounded-xl hover:bg-vivero-green transition-colors flex justify-center items-center shadow-lg disabled:opacity-60 disabled:cursor-not-allowed mt-4">
-                {cargando ? 'Procesando pedido...' : 'Confirmar Pedido (Pagar al recibir)'}
-              </button>
+              {!esPayPal && (
+                <button type="submit" disabled={!puedeConfirmar} className="w-full bg-vivero-dark text-white font-bold py-4 rounded-xl hover:bg-vivero-green transition-colors flex justify-center items-center shadow-lg disabled:opacity-60 disabled:cursor-not-allowed mt-4">
+                  {cargando ? 'Procesando pedido...' : 'Confirmar Pedido (Pagar al recibir)'}
+                </button>
+              )}
+
+              {esPayPal && (
+                <div className="mt-4 space-y-3">
+                  {totalDolares !== null && (
+                    <p className="text-sm text-vivero-dark/70 text-center">
+                      PayPal cobra en dólares: pagarás <strong>${totalDolares.toFixed(2)} USD</strong>
+                      {' '}(tipo de cambio Q{tasaCambio.toFixed(2)} por $1).
+                    </p>
+                  )}
+
+                  {paypal.estado === 'cargando' ? (
+                    <p className="text-center text-vivero-dark/60 py-4">Cargando PayPal…</p>
+                  ) : !paypal.clientId ? (
+                    <p className="text-vivero-dark bg-vivero-yellow/20 rounded-xl p-3 text-sm font-medium text-center">
+                      El pago con PayPal aún no está disponible. Elige otro método de pago.
+                    </p>
+                  ) : cargando ? (
+                    <p className="text-center font-semibold text-vivero-dark py-4">Confirmando tu pago…</p>
+                  ) : (
+                    <PayPalScriptProvider options={{ clientId: paypal.clientId, currency: 'USD', intent: 'capture' }}>
+                      <PayPalButtons
+                        style={{ layout: 'vertical', shape: 'rect', label: 'pay' }}
+                        disabled={!puedeConfirmar}
+                        forceReRender={[total, envioSeleccionado?.id]}
+                        onClick={paypalOnClick}
+                        createOrder={paypalCrearOrden}
+                        onApprove={paypalAprobado}
+                        onCancel={() => setError('Cancelaste el pago. Puedes intentarlo de nuevo cuando quieras.')}
+                        onError={() => setError((e) => e || 'Hubo un problema con PayPal. Intenta de nuevo.')}
+                      />
+                    </PayPalScriptProvider>
+                  )}
+                </div>
+              )}
             </form>
           </div>
 
@@ -382,6 +504,12 @@ export default function PagoContraEntrega() {
                   <span>Total</span>
                   <span className="text-vivero-green">{formatearQ(total)}</span>
                 </div>
+                {esPayPal && totalDolares !== null && (
+                  <div className="flex justify-between text-sm text-vivero-dark/60">
+                    <span>Equivalente PayPal</span>
+                    <span>${totalDolares.toFixed(2)} USD</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

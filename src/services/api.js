@@ -1,5 +1,6 @@
 export const BASE_URL = import.meta.env.VITE_API_URL || 'https://viverobackend.onrender.com';
-// Rutas de clientes: si tu compañero las cambia, cámbialas AQUÍ
+
+// Rutas de clientes: s
 const RUTAS_CLIENTES = {
   registro: '/api/clientes/registro',
   verificar: '/api/clientes/verificar',
@@ -101,10 +102,8 @@ export async function obtenerPedidosCliente(clienteId) {
   return Array.isArray(datos) ? datos : datos.pedidos ?? [];
 }
 
-
-
-
-//  GET /api/pedidos/{id}/detalle?clienteId=... 
+// Detalle de UN pedido: productos, dirección, envío y totales.
+//  GET /api/pedidos/{id}/detalle?clienteId=...  (sin clienteId = vista del administrador)
 export async function obtenerDetallePedido(pedidoId, clienteId) {
   const filtro = clienteId != null ? `?clienteId=${clienteId}` : '';
   let response;
@@ -120,8 +119,6 @@ export async function obtenerDetallePedido(pedidoId, clienteId) {
   }
   return response.json();
 }
-
-
 
 // Zonas de envío configuradas en la tabla ENVIOS: [{ id, departamento, municipio, zonaReferencia, costoEnvio }]
 export async function obtenerEnvios() {
@@ -150,6 +147,23 @@ export function crearPedido({ clienteId, envioId, departamento, municipio, metod
   });
 }
 
+// ---------- PayPal ----------
+// Configuración pública de PayPal: Client ID y tasa de cambio (el Secret se queda en el backend)
+export async function obtenerConfigPayPal() {
+  const response = await fetch(`${BASE_URL}/api/paypal/config`);
+  if (!response.ok) throw new Error('No pudimos cargar la configuración de PayPal.');
+  return response.json(); // { configurado, clientId, tasaCambio, moneda }
+}
+
+// Paso 1: el backend calcula el total y crea la orden en PayPal. Devuelve { id, totalQuetzales, totalDolares }
+export function crearOrdenPayPal(pedido) {
+  return postJson('/api/paypal/orden', pedido);
+}
+
+// Paso 2: después de que el cliente aprueba, el backend cobra y guarda el pedido. Devuelve { mensaje, pedido }
+export function capturarPagoPayPal({ paypalOrderId, pedido }) {
+  return postJson('/api/paypal/capturar', { paypalOrderId, pedido });
+}
 
 
 // Registro de productos (soporta FormData con imagen)
