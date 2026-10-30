@@ -4,9 +4,7 @@ import { LayoutDashboard, PackagePlus, ShoppingBag, Users, LogOut, Eye, Search, 
 import { useConfirm } from './ConfirmDialog';
 import { useAuth } from './AuthContext';
 import { BASE_URL } from './services/api';
-
-
-
+import DetallePedidoModal from './DetallePedidoModal';
 
 // Texto de la ventana de confirmación para cada cambio de estado
 const CONFIRMACION_ESTADO = {
@@ -35,6 +33,7 @@ export default function PanelPedidos() {
   const { logout } = useAuth();
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [pedidoAbierto, setPedidoAbierto] = useState(null); // pedido cuyo detalle se está viendo
 
   // URL base de tu API Spring Boot
   const API_URL = `${BASE_URL}/api/pedidos`;
@@ -207,7 +206,7 @@ export default function PanelPedidos() {
                           {/* BOTONERA DE GESTIÓN */}
                           <td className="p-4">
                             <div className="flex items-center justify-center space-x-2">
-                              <button className="p-2 text-vivero-dark/50 hover:bg-gray-100 rounded-lg transition-colors" title="Ver detalles del pedido">
+                              <button onClick={() => setPedidoAbierto(pedido)} className="p-2 text-vivero-dark/50 hover:bg-gray-100 rounded-lg transition-colors" title="Ver detalles del pedido">
                                 <Eye className="w-5 h-5" />
                               </button>
                               
@@ -240,6 +239,21 @@ export default function PanelPedidos() {
 
         </div>
       </div>
+
+      {pedidoAbierto && (
+        <DetallePedidoModal
+          resumen={{
+            id: pedidoAbierto.idCotizacion,
+            fecha: pedidoAbierto.fechaSolicitud,
+            estado: pedidoAbierto.estado,
+            metodo: pedidoAbierto.metodoPago,
+            total: pedidoAbierto.totalEstimado,
+            clienteNombre: pedidoAbierto.nombreCliente || pedidoAbierto.cliente,
+          }}
+          modoAdmin
+          onCerrar={() => setPedidoAbierto(null)}
+        />
+      )}
     </div>
   );
 }

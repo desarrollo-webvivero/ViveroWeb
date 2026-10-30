@@ -103,12 +103,13 @@ export async function obtenerPedidosCliente(clienteId) {
 
 
 
-// Detalle de UN pedido: productos, dirección, envío y totales.
-//  GET /api/pedidos/{id}/detalle?clienteId=...
+
+//  GET /api/pedidos/{id}/detalle?clienteId=... 
 export async function obtenerDetallePedido(pedidoId, clienteId) {
+  const filtro = clienteId != null ? `?clienteId=${clienteId}` : '';
   let response;
   try {
-    response = await fetch(`${BASE_URL}/api/pedidos/${pedidoId}/detalle?clienteId=${clienteId}`);
+    response = await fetch(`${BASE_URL}/api/pedidos/${pedidoId}/detalle${filtro}`);
   } catch {
     throw new Error('No pudimos conectar con el servidor. Intenta de nuevo en un momento.');
   }
