@@ -123,7 +123,7 @@ export const CartProvider = ({ children }) => {
             onClick={() => setIsOpen(true)}
             className="fixed bottom-6 right-6 z-50 bg-vivero-yellow text-vivero-dark p-4 rounded-full shadow-2xl hover:bg-yellow-400 transition-all transform hover:scale-110 hover:-translate-y-2 border-2 border-white flex items-center justify-center"
           >
-            {'>'}
+            
             <ShoppingBag className="w-6 h-6" />
             {totalItems > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
